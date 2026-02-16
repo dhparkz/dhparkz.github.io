@@ -64,7 +64,7 @@ hit-test 뷰는 터치이벤트를 핸들링 할수 있는 기회를 첫번째�
   - motionBegan:withEvent
   - motionEnded:withEvent
 -  **액션 메시지** : 사용자가 버튼, 스위치 같은 컨트롤을 만들었고 액션 메서드의 타겟이 nil일때, 액션 메시지는 자신을 처리할 수있는 *첫번째 리스폰더* 부터 시작되면서 리스폰더 체인으로 전달됩니다.
--  **편집메뉴 메시지** : 사용자가 편집메뉴의 명령()을 탭했을때, iOS는 리스폰더 체인을 사용하여 *cut:, copy:, paste:* 와 같은 필요한 메서드들이 정의되어 있는 객체를 찾습니다. 더 자세한 내용은 [Displaying and Managing the Edit Menu]()에 설명되어 있습니다.
+-  **편집메뉴 메시지** : 사용자가 편집메뉴의 명령을 탭했을때, iOS는 리스폰더 체인을 사용하여 *cut:, copy:, paste:* 와 같은 필요한 메서드들이 정의되어 있는 객체를 찾습니다. 더 자세한 내용은 “Displaying and Managing the Edit Menu” 문서를 참고하세요.
 -  **텍스트 편집** : 사용자가 텍스트필드나 텍스트 뷰를 탭했을때, 그 뷰는 자동적으로 *First Responder*가 됩니다. 기본적으론 가상 키보드가 나타나고 텍스트필드나 텍스트뷰가 편집의 포커스로 맞춰집니다. 당신은 키보드가 아닌 다른 당신의 앱에 맞는 커스텀 입력뷰를 보여줄 수도 있습니다. 또한 아무 리스폰더 객체에 커스텁 입력뷰를 더해줄 수도 있습니다. 자세한 사항은 [Custom Views for Data Input](https://developer.apple.com/library/ios/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/InputViews/InputViews.html#//apple_ref/doc/uid/TP40009542-CH12)을 참고합시다.
 
 UIKit은 자동적으로 사용자가 탭한 텍스트필드나 텍스트뷰를 *First Responder* 로 만듭니다. 앱은 모든 다른 첫번째 리스폰더 객체들을 *becomeFirstResponder:* 메서드로 명시적으로 설정 해줘야합니다.
