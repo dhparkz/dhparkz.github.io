@@ -2,13 +2,13 @@
 title: dhparkz blog
 name: dhparkz blog
 description: > # this means to ignore newlines until "author"
-  Blogging about stuffs
-  and development
+  Blogging about software engineering,
+  Android, and development notes
 
 email: dhp0102@gmail.com
 baseurl: "" # the subpath of your site, e.g. /blog/
 
-domain_name: 'http://dhparkz.github.io'
+domain_name: 'https://dhparkz.github.io'
 github_username:  dhparkz
 facebook_username: Dae hyun Park
 timezone : Asia/Seoul
@@ -19,7 +19,7 @@ markdown: kramdown
 highlighter: rouge
 logo: false
 paginate: 15
-google_analytics: 'UA-XXXXXXXX-X'
+google_analytics: ''
 sass:
     sass_dir: _sass
     style: :compressed
@@ -27,7 +27,7 @@ sass:
 gems: [jekyll-paginate]
 
 # Details for the RSS feed generator
-url: "http://dhparkz.github.io" # the base hostname & protocol for your site
+url: "https://dhparkz.github.io" # the base hostname & protocol for your site
 author: Daehyun Park
 author_description: >
   https://dhparkz.github.io/about
