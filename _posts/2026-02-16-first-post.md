@@ -5,7 +5,7 @@ categories: [Blog]
 tags: [start, github-pages, jekyll]
 ---
 
-안녕하세요. 박대현입니다.
+안녕하세요. @dhparkz입니다.
 
 GitHub Pages + Jekyll(Chirpy)로 기술 블로그를 시작했습니다.
 앞으로 개발하면서 배운 내용, 문제 해결 과정, 그리고 회고를 꾸준히 기록할 예정입니다.

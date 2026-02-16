@@ -16,7 +16,7 @@ timezone: Asia/Seoul
 
 title: 데탑봇 기술블로그 # the main title
 
-tagline: 박대현의 개발 기록 # it will display as the subtitle
+tagline: @dhparkz의 개발 기록 # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
   A minimal, responsive and feature-rich Jekyll theme for technical writing.
@@ -34,7 +34,7 @@ twitter:
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: 박대현
+  name: @dhparkz
   email: example@domain.com # change to your email address
   links:
     # The first element serves as the copyright owner's link

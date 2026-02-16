@@ -11,7 +11,7 @@ tags: [Anthropic, Claude, Agent Skills, Translation]
 그래서 개인 공부 겸, 필요한 분들이 바로 읽을 수 있게
 핵심 내용을 한글로 번역하고 정리해봤다.
 
-- 정리한 저장소: https://github.com/dhparkz/study-agent-skills
+- 정리한 저장소: [study-agent-skills](https://github.com/dhparkz/study-agent-skills)
 
 ## 왜 이 자료가 괜찮았냐면
 
@@ -49,6 +49,6 @@ tags: [Anthropic, Claude, Agent Skills, Translation]
 
 ### 참고 링크
 
-- Anthropic 블로그: https://claude.com/blog/equipping-agents-for-the-real-world-with-agent-skills
-- 공식 문서(Agent Skills): https://platform.claude.com/docs/ko/agents-and-tools/agent-skills/overview
-- 원문 가이드 PDF: https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf
+- [Anthropic 블로그: Equipping agents for the real world with Agent Skills](https://claude.com/blog/equipping-agents-for-the-real-world-with-agent-skills)
+- [공식 문서(Agent Skills)](https://platform.claude.com/docs/ko/agents-and-tools/agent-skills/overview)
+- [원문 가이드 PDF](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
