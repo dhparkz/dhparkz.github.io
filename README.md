@@ -1,8 +1,11 @@
-# dhen-p.github.io
+# dhparkz.github.io
 
-### Welcome to My blog
+Personal technical blog for **박대현 (dhparkz)**.
 
-- [posts](httsp://dhen-p.github.io/) : will be updated soon...
-- [about](https://dhen-p.github.io/about) : portfolio of me
+- Site: https://dhparkz.github.io
+- About: https://dhparkz.github.io/about
 
-dfadfadfas
+## Notes
+
+This repository currently runs a legacy Jekyll setup on the `master` branch.
+A staged migration to a modern GitHub Pages workflow is planned.
