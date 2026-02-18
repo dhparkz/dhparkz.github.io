@@ -5,29 +5,34 @@ categories: [Blog]
 tags: [start, github-pages, jekyll, openclaw, agents]
 ---
 
-안녕하세요. @dhparkz입니다.
+안녕하세요. [@dhparkz](https://github.com/dhparkz)입니다.
 
-GitHub Pages + Jekyll(Chirpy)로 기술 블로그를 시작했습니다.
-그리고 이 블로그의 중요한 운영 원칙 하나를 먼저 공유합니다.
+저는 Andorid Application Development로 분야에서 Software Engineer일하고 있고, SW분야 게시글을 공유하기위해 블로그를 개설했습니다. 
 
-> 이 블로그의 글은 OpenClaw 기반 Agent 팀(전략/리서치/작성/편집/퍼블리시)의 협업으로 작성·정리·발행됩니다.
+이 블로그에 게시되는 글은 OpenClaw 기반 5개의 Multi-Agent 팀(전략/리서치/작성/편집/퍼블리시)의 협업으로 작성·정리·발행됩니다.
 
-단순히 "AI가 써준다" 수준이 아니라, 역할을 분리한 워크플로우로 운영합니다.
+- **🧭 블로그 전략 에이전트(blog-strategy agent)**: 어떤 주제를 왜 지금 써야 하는지 우선순위를 정합니다.
+- **🔎 블로그 리서치 에이전트(blog-research agent)**: 키워드, 검색 의도, 근거 자료를 수집하고 정리합니다.
+- **✍️ 블로그 작성 에이전트(blog-writer agent)**: 섹션 단위로 초안을 작성합니다.
+- **🧪 블로그 편집 에이전트(blog-editor agent)**: 논리, 사실성, 가독성을 검토합니다.
+- **🚀 블로그 발행 에이전트(blog-publish agent)**: Jekyll 포맷/메타데이터를 정리해 발행 준비를 합니다.
 
-- **Strategy Agent**: 어떤 주제를 왜 지금 써야 하는지 우선순위를 정합니다.
-- **Research Agent**: 키워드, 검색 의도, 근거 자료를 수집하고 정리합니다.
-- **Writer Agent**: 섹션 단위로 초안을 작성합니다.
-- **Editor Agent**: 논리, 사실성, 가독성을 검토합니다.
-- **Publisher Agent**: Jekyll 포맷/메타데이터를 정리해 발행 준비를 합니다.
 
-이 과정에서 본문을 매번 통째로 모델에 던지지 않고,
-파일 기반 단일 소스(Source of Truth)와 섹션 단위 컨텍스트를 사용해 품질과 비용 효율을 함께 챙깁니다.
+LLM모델은 gpt-5.3-codex, gpt-5.1-codex-mini를 사용하고 있습니다. (2026-02-18기준)
 
-첫 목표는 아래 4가지입니다.
+|agent|model|
+|:--|:--|
+|🧭 블로그 전략 에이전트(blog-strategy agent)|openai-codex/gpt-5.3-codex|
+|🔎 블로그 리서치 에이전트(blog-research agent)|openai-codex/gpt-5.3-codex|
+|✍️ 블로그 작성 에이전트(blog-writer agent)|openai-codex/gpt-5.1-codex-mini|
+|🧪 블로그 편집 에이전트(blog-editor agent)|openai-codex/gpt-5.3-codex|
+|🚀 블로그 발행 에이전트(blog-publish agent)|openai-codex/gpt-5.1-codex-mini|
+
+다음과 같은 목표로 진행해보고 있습니다.
 
 1. 짧아도 매주 1개 글 발행하기
 2. 문제 해결 과정을 재현 가능한 형태로 남기기
 3. 시행착오를 자산으로 만들기
-4. OpenClaw Agent 협업 방식 자체도 투명하게 기록하기
+4. OpenClaw Agent 협업 방식으로 쉽게 게시글 남기기
 
-시작이 반이니까, 일단 첫 글부터 올립니다. 🚀
+시작이 반이니까, 우선 새로 시작하는 첫 글을 올립니다. 🚀
