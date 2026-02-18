@@ -1,10 +1,19 @@
-# Context Engineering: “프롬프트”를 넘어 “컨텍스트”를 설계한다는 말의 의미
+---
+layout: post
+title: "Context Engineering: 프롬프트를 넘어 컨텍스트를 설계한다는 말의 의미"
+date: 2026-02-18 09:00:00 +0900
+categories: [AI, Engineering]
+tags: [context-engineering, prompt-engineering, llm, agents]
+description: "프롬프트 엔지니어링을 넘어 컨텍스트 엔지니어링을 실패 모드, 파이프라인, 4버킷(Write/Select/Compress/Isolate)으로 정리하고 PR 리뷰 에이전트 예시로 적용합니다."
+---
 
 > 작성 목적: 최근 “Context Engineering”이라는 주제로 탐색하며 얻은 몇 가지 레퍼런스를 토대로 정리해 보았습니다.
 >
-> Co authored by LLM, ChatGPT(gpt-5.2-thinking)
+> Co-authored with LLM (ChatGPT, gpt-5.2-thinking)
 
 **많은 실무 상황에서 에이전트 성능의 병목은 모델 자체보다, 매 턴 컨텍스트를 어떻게 구성·유지·정리하느냐에서 더 자주 나타납니다.**
+
+<!--more-->
 
 ---
 
@@ -59,7 +68,6 @@ Anthropic은 컨텍스트 엔지니어링을 프롬프트 엔지니어링의 “
 
 ![Effective context engineering for AI agents | Anthropic](../assets/context_vs_prompt.png)
 > image from https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
->
 
 PromptingGuide도 “단순 프롬프트를 넘어 ‘전체 컨텍스트를 설계(architect)’하는 단계”로 정의합니다.  
 (출처: https://www.promptingguide.ai/guides/context-engineering-guide)
@@ -191,7 +199,7 @@ Anthropic 글은 컨텍스트에 “MCP 같은 외부 연결, 도구, 데이터�
 
 ## 8) 개발자 친화적 예시: “PR 리뷰 에이전트”에 적용해보면
 
-예를 들어 PR 리뷰를 돕는 에이전트를 만든다고 가정해봅시다(정답 동작은 팀/조직마다 달라서, 아래는 한 가지 예시시입니다).
+예를 들어 PR 리뷰를 돕는 에이전트를 만든다고 가정해봅시다(정답 동작은 팀/조직마다 달라서, 아래는 한 가지 예시입니다).
 
 ### 컨텍스트 소스(Write/Select)
 
