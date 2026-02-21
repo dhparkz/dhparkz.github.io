@@ -1,0 +1,28 @@
+/* Sidebar customization (light mode friendly, blue palette) */
+#sidebar {
+  background: linear-gradient(180deg, #eaf3ff 0%, #dcecff 100%);
+  border-right: 1px solid #bfd8ff;
+}
+
+#sidebar .site-title,
+#sidebar .site-subtitle,
+#sidebar .nav-link,
+#sidebar .sidebar-bottom a {
+  color: #1e3a8a;
+}
+
+#sidebar .nav-link:hover,
+#sidebar .nav-item.active .nav-link {
+  background-color: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
+  border-radius: 0.6rem;
+}
+
+#sidebar #avatar {
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.22);
+  border: 2px solid #93c5fd;
+}
+
+#sidebar .sidebar-bottom .icon-border {
+  border-color: #93c5fd;
+}
