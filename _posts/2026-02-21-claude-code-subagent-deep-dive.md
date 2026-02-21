@@ -108,7 +108,8 @@ MCP 도구 검색에서도 최적화가 적용된다. v2.1.7부터 MCP 도구 �
 
 ### 병렬 실행과 제한사항
 
-Claude Code는 최대 **10개의 동시 SubAgent 태스크**를 지원하며, 초과 요청은 지능적 큐잉으로 처리한다. SubAgent는 기본적으로 백그라운드에서 실행되며, 메인 에이전트는 SubAgent 실행 중에도 사용자 입력을 받을 수 있다. `Ctrl+B`로 실행 중인 태스크를 수동으로 백그라운드 전환할 수 있고, `/tasks` 다이얼로그에서 모든 활성 백그라운드 태스크의 실시간 상태를 확인할 수 있다.
+[reddit에서 검색된 정보](https://www.reddit.com/r/ClaudeAI/comments/1lk0usp/subagent_testing_what_happens_when_you_throw_100)에 따르면,
+Claude Code는 최대 **10개의 동시 SubAgent 태스크**를 지원하는것으로 보이며, 초과 요청은 지능적 큐잉으로 처리한다. SubAgent는 기본적으로 백그라운드에서 실행되며, 메인 에이전트는 SubAgent 실행 중에도 사용자 입력을 받을 수 있다. `Ctrl+B`로 실행 중인 태스크를 수동으로 백그라운드 전환할 수 있고, `/tasks` 다이얼로그에서 모든 활성 백그라운드 태스크의 실시간 상태를 확인할 수 있다.
 
 다만 백그라운드 SubAgent에는 중요한 제한이 있다.
 
