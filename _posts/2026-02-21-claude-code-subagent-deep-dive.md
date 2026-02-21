@@ -18,13 +18,28 @@ Claude Code의 SubAgent는 **독립된 컨텍스트 윈도우에서 특정 작�
 
 SubAgent는 특정 유형의 작업을 처리하도록 설계된 독립 AI 인스턴스다. 각 SubAgent는 자체 컨텍스트 윈도우에서 실행되며, 커스텀 시스템 프롬프트·특정 도구 액세스·독립적 권한을 갖는다. Claude가 SubAgent의 description과 일치하는 작업을 만나면 자동으로 위임하고, SubAgent는 독립적으로 작업한 뒤 결과 요약을 반환한다.
 
-Claude Code는 **3종의 내장 SubAgent**를 제공한다.
+### Claude Code 내장 SubAgent (총 6종)
 
-| SubAgent | 모델 | 권한 | 허용 도구 | 역할 |
-|----------|------|------|-----------|------|
-| **Explore** | Haiku | 읽기 전용 | Glob, Grep, Read, 제한된 Bash | 코드베이스 빠른 탐색 (quick / medium / very thorough 3단계) |
-| **Plan** | Sonnet | 읽기 전용 | Glob, Grep, Read | Plan Mode에서만 호출, 구현 계획 수립 |
-| **General-purpose** | Sonnet | 전체 | 전체 도구셋 | 탐색과 수정을 모두 요구하는 복잡한 다단계 작업 |
+Claude Code는 **총 6종(기본 3종 + 도우미 3종)**의 내장 SubAgent를 제공한다.
+
+#### 기본 내장 SubAgent (3종)
+- **Explore**
+- **Plan**
+- **General-purpose**
+
+#### 도우미 SubAgent (Other, 3종)
+- **Bash**
+- **statusline-setup**
+- **Claude Code Guide**
+
+|| SubAgent | 구분 | 모델 | 권한 | 허용 도구 | 역할 |
+|---|---|---|---|---|---|
+| **Explore** | 기본 | Haiku | 읽기 전용 | 읽기 전용 도구 *(Write/Edit 거부)* | 코드베이스 빠른 탐색 *(quick / medium / very thorough: 3단계)* |
+| **Plan** | 기본 | 주 대화에서 상속 | 읽기 전용 | 읽기 전용 도구 *(Write/Edit 거부)* | Plan Mode에서만 호출, 구현 계획 수립 전 컨텍스트 수집 |
+| **General-purpose** | 기본 | 주 대화에서 상속 | 전체 | 모든 도구 | 탐색과 수정을 모두 요구하는 복잡한 다단계 작업 |
+| **Bash** | 도우미(Other) | 상속 | - | *(문서에 별도 명시 없음)* | 별도 컨텍스트에서 터미널 명령 실행 |
+| **statusline-setup** | 도우미(Other) | Sonnet | - | *(문서에 별도 명시 없음)* | `/statusline` 실행으로 상태 표시줄 구성 |
+| **Claude Code Guide** | 도우미(Other) | Haiku | - | *(문서에 별도 명시 없음)* | Claude Code 기능 Q&A용 |
 
 SubAgent가 Claude Code 에코시스템에서 수행하는 핵심 역할은 세 가지다.
 
@@ -698,8 +713,8 @@ Claude Code SubAgent의 본질은 **컨텍스트 관리 도구**다. 독립적 A
 
 | 구분 | 링크 |
 |------|------|
-| 📖 공식 문서 (한국어) | [code.claude.com/docs/ko/sub-agents](https://code.claude.com/docs/ko/sub-agents) |
-| 📖 공식 문서 (영어) | [docs.anthropic.com/en/docs/claude-code/sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) |
+| 📖 SubAgent - claude code 공식 문서 (한국어) | [code.claude.com/docs/ko/sub-agents](https://code.claude.com/docs/ko/sub-agents) |
+| 📖 SubAgent - claude code 공식 문서 (영어) | [https://code.claude.com/docs/en/sub-agents](https://code.claude.com/docs/en/sub-agents) |
 | 📖 SDK SubAgent | [platform.claude.com/docs/en/agent-sdk/subagents](https://platform.claude.com/docs/en/agent-sdk/subagents) |
 | 🔧 커뮤니티 SubAgent 100+ | [github.com/VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) |
 | 🔧 멀티에이전트 오케스트레이션 예시 | [github.com/wshobson/agents](https://github.com/wshobson/agents) |
