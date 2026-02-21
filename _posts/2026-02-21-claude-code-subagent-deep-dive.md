@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: "Claude Code SubAgent 뜯어보기"
 date: 2026-02-21 21:34:00 +0900
@@ -8,122 +8,124 @@ description: "Claude Code SubAgent의 개념, 내부 동작, 구성 방식, 실�
 ---
 
 <!--more-->
-# Claude Code SubAgent ??뼱蹂닿린
+# Claude Code SubAgent 뜯어보기
 
-Claude Code??SubAgent??**?낅┰??而⑦뀓?ㅽ듃 ?덈룄?곗뿉???뱀젙 ?묒뾽???섑뻾?섎뒗 ?뱁솕??AI ?댁떆?ㅽ꽩??*?? 硫붿씤 ?먯씠?꾪듃??而⑦뀓?ㅽ듃瑜?蹂댁〈?섎㈃??蹂듭옟???묒뾽??遺꾪븷쨌?꾩엫?섎뒗 ?듭떖 硫붿빱?덉쬁?쇰줈, 2025??以묐컲 ?꾩엯 ?댄썑 Claude Code ?꾪궎?띿쿂??以묒떖異뺤씠 ?섏뿀?? ?댁옣 SubAgent 3醫?Explore, Plan, General-purpose)怨??ъ슜???뺤쓽 SubAgent瑜?吏?먰븯硫? 理쒕? **10媛쒖쓽 ?숈떆 蹂묐젹 ?ㅽ뻾**, YAML frontmatter 湲곕컲??留덊겕?ㅼ슫 ?뚯씪 援ъ꽦, MCP ?꾧뎄 ?곸냽???뱀쭠?쇰줈 ?쒕떎. Simon Willison(?紐?媛쒕컻?????쒗쁽泥섎읆 SubAgent??蹂몄쭏?곸쑝濡?**"?좏겙 而⑦뀓?ㅽ듃 理쒖쟻???댄궧"** ?대ŉ, 理쒕? ~240,000 ?좏겙???낅┰?곸쑝濡??뚮퉬????吏㏃? ?붿빟留?遺紐⑥뿉寃?諛섑솚?쒕떎.
+Claude Code의 SubAgent는 **독립된 컨텍스트 윈도우에서 특정 작업을 수행하는 특화된 AI 어시스턴트**다. 메인 에이전트의 컨텍스트를 보존하면서 복잡한 작업을 분할·위임하는 핵심 메커니즘으로, 2025년 중반 도입 이후 Claude Code 아키텍처의 중심축이 되었다. 내장 SubAgent 3종(Explore, Plan, General-purpose)과 사용자 정의 SubAgent를 지원하며, 최대 **10개의 동시 병렬 실행**, YAML frontmatter 기반의 마크다운 파일 구성, MCP 도구 상속을 특징으로 한다. Simon Willison(저명 개발자)의 표현처럼 SubAgent는 본질적으로 **"토큰 컨텍스트 최적화 해킹"** 이며, 최대 ~240,000 토큰을 독립적으로 소비한 뒤 짧은 요약만 부모에게 반환한다.
 
 ---
 
-## SubAgent??湲곕낯 媛쒕뀗怨??먯퐫?쒖뒪??????븷
+## SubAgent의 기본 개념과 에코시스템 내 역할
 
-SubAgent???뱀젙 ?좏삎???묒뾽??泥섎━?섎룄濡??ㅺ퀎???낅┰ AI ?몄뒪?댁뒪?? 媛?SubAgent???먯껜 而⑦뀓?ㅽ듃 ?덈룄?곗뿉???ㅽ뻾?섎ŉ, 而ㅼ뒪? ?쒖뒪???꾨＼?꾪듃쨌?뱀젙 ?꾧뎄 ?≪꽭?ㅒ룸룆由쎌쟻 沅뚰븳??媛뽯뒗?? Claude媛 SubAgent??description怨??쇱튂?섎뒗 ?묒뾽??留뚮굹硫??먮룞?쇰줈 ?꾩엫?섍퀬, SubAgent???낅┰?곸쑝濡??묒뾽????寃곌낵 ?붿빟??諛섑솚?쒕떎.
+SubAgent는 특정 유형의 작업을 처리하도록 설계된 독립 AI 인스턴스다. 각 SubAgent는 자체 컨텍스트 윈도우에서 실행되며, 커스텀 시스템 프롬프트·특정 도구 액세스·독립적 권한을 갖는다. Claude가 SubAgent의 description과 일치하는 작업을 만나면 자동으로 위임하고, SubAgent는 독립적으로 작업한 뒤 결과 요약을 반환한다.
 
-Claude Code??**3醫낆쓽 ?댁옣 SubAgent**瑜??쒓났?쒕떎.
+Claude Code는 **3종의 내장 SubAgent**를 제공한다.
 
-| SubAgent | 紐⑤뜽 | 沅뚰븳 | ?덉슜 ?꾧뎄 | ??븷 |
+| SubAgent | 모델 | 권한 | 허용 도구 | 역할 |
 |----------|------|------|-----------|------|
-| **Explore** | Haiku | ?쎄린 ?꾩슜 | Glob, Grep, Read, ?쒗븳??Bash | 肄붾뱶踰좎씠??鍮좊Ⅸ ?먯깋 (quick / medium / very thorough 3?④퀎) |
-| **Plan** | Sonnet | ?쎄린 ?꾩슜 | Glob, Grep, Read | Plan Mode?먯꽌留??몄텧, 援ы쁽 怨꾪쉷 ?섎┰ |
-| **General-purpose** | Sonnet | ?꾩껜 | ?꾩껜 ?꾧뎄??| ?먯깋怨??섏젙??紐⑤몢 ?붽뎄?섎뒗 蹂듭옟???ㅻ떒怨??묒뾽 |
+| **Explore** | Haiku | 읽기 전용 | Glob, Grep, Read, 제한된 Bash | 코드베이스 빠른 탐색 (quick / medium / very thorough 3단계) |
+| **Plan** | Sonnet | 읽기 전용 | Glob, Grep, Read | Plan Mode에서만 호출, 구현 계획 수립 |
+| **General-purpose** | Sonnet | 전체 | 전체 도구셋 | 탐색과 수정을 모두 요구하는 복잡한 다단계 작업 |
 
-SubAgent媛 Claude Code ?먯퐫?쒖뒪?쒖뿉???섑뻾?섎뒗 ?듭떖 ??븷? ??媛吏??
+SubAgent가 Claude Code 에코시스템에서 수행하는 핵심 역할은 세 가지다.
 
-- **而⑦뀓?ㅽ듃 蹂댁〈** ???섏떗 媛??뚯씪???쎄굅??愿묐쾾?꾪븳 寃?됱쓣 ?섑뻾?대룄 硫붿씤 ??붾뒗 ?붿빟留?諛쏆쑝誘濡? ?μ떆媛??몄뀡?먯꽌 而⑦뀓?ㅽ듃 ?뚯쭊??諛⑹??쒕떎.
-- **?쒖빟 議곌굔 ?곸슜** ??媛?SubAgent???덉슜?섎뒗 ?꾧뎄瑜??쒗븳???덉쟾???묒뾽 踰붿쐞瑜?媛뺤젣?쒕떎.
-- **援ъ꽦 ?ъ궗??* ???ъ슜???섏? SubAgent(`~/.claude/agents/`)瑜??뺤쓽?섎㈃ 紐⑤뱺 ?꾨줈?앺듃?먯꽌 ?숈씪???꾨Ц ?먯씠?꾪듃瑜??ъ궗?⑺븷 ???덈떎.
+- **컨텍스트 보존** — 수십 개 파일을 읽거나 광범위한 검색을 수행해도 메인 대화는 요약만 받으므로, 장시간 세션에서 컨텍스트 소진을 방지한다.
+- **제약 조건 적용** — 각 SubAgent에 허용되는 도구를 제한해 안전한 작업 범위를 강제한다.
+- **구성 재사용** — 사용자 수준 SubAgent(`~/.claude/agents/`)를 정의하면 모든 프로젝트에서 동일한 전문 에이전트를 재사용할 수 있다.
 
-怨듭떇 臾몄꽌??SubAgent? Agent Team??李⑥씠??紐낇솗??援щ텇?쒕떎.
+공식 문서는 SubAgent와 Agent Team의 차이도 명확히 구분한다.
 
-| 援щ텇 | SubAgent | Agent Team |
+| 구분 | SubAgent | Agent Team |
 |------|----------|------------|
-| **?ㅽ뻾 踰붿쐞** | ?⑥씪 ?몄뀡 ??| 蹂꾨룄 ?몄뀡 媛?|
-| **寃곌낵 蹂닿퀬** | 硫붿씤 而⑦뀓?ㅽ듃???붿빟 諛섑솚 | ?몄뀡 媛??곹샇 ?듭떊 |
-| **?깆닕??* | ?덉젙 | ?ㅽ뿕??|
+| **실행 범위** | 단일 세션 내 | 별도 세션 간 |
+| **결과 보고** | 메인 컨텍스트에 요약 반환 | 세션 간 상호 통신 |
+| **성숙도** | 안정 | 실험적 |
 
 ---
 
-## ?대? ?숈옉 ?먮━: orchestrator-subagent ?⑦꽩
+## 내부 동작 원리: orchestrator-subagent 패턴
 
-Claude Code??**?⑥씪 ?ㅻ젅??留덉뒪??猷⑦봽**(?대? 肄붾뱶紐?"nO")瑜??ъ슜?쒕떎. 紐⑤뜽 ?묐떟???꾧뎄 ?몄텧???ы븿?섎㈃ 猷⑦봽媛 怨꾩냽 ?ㅽ뻾?섍퀬, ?쇰컲 ?띿뒪?몃쭔 諛섑솚?섎㈃ 猷⑦봽媛 醫낅즺?섏뼱 ?ъ슜?먯뿉寃??쒖뼱沅뚯씠 ?뚯븘媛꾨떎. ???ㅺ퀎??蹂듭옟??硫?곗뿉?댁쟾???ㅼ썫 ???**?붾쾭源??⑹씠?굿룻닾紐낆꽦쨌?좊ː??*???곗꽑?쒗븳??
+Claude Code는 **단일 스레드 마스터 루프**(내부 코드명 "nO")를 사용한다. 모델 응답에 도구 호출이 포함되면 루프가 계속 실행되고, 일반 텍스트만 반환하면 루프가 종료되어 사용자에게 제어권이 돌아간다. 이 설계는 복잡한 멀티에이전트 스웜 대신 **디버깅 용이성·투명성·신뢰성**을 우선시한다.
 
-**Task ?꾧뎄**媛 SubAgent ?앹꽦???좎씪???명꽣?섏씠?ㅻ떎.
+**Task 도구**가 SubAgent 생성의 유일한 인터페이스다.
 
-| ?꾨뱶 | ?꾩닔 | ?ㅻ챸 |
+| 필드 | 필수 | 설명 |
 |------|------|------|
-| `description` | ??| 3-5?⑥뼱 ?붿빟 |
-| `prompt` | ??| ?꾩껜 ?묒뾽 吏???댁슜 |
-| `subagent_type` | ??| ?먯씠?꾪듃 ?좏삎 |
-| `resume` | ??| ?댁쟾 ?먯씠?꾪듃 ID (?ш컻 ?? |
+| `description` | ✅ | 3-5단어 요약 |
+| `prompt` | ✅ | 전체 작업 지시 내용 |
+| `subagent_type` | ✅ | 에이전트 유형 |
+| `resume` | ❌ | 이전 에이전트 ID (재개 시) |
 
-?ㅼ젣 ?몄텧 ??硫붿씤 ?먯씠?꾪듃媛 Task ?꾧뎄瑜??듯빐 SubAgent瑜??앹꽦?섎㈃, SubAgent???먯껜 ?쒖뒪???꾨＼?꾪듃? 湲곕낯 ?섍꼍 ?뺣낫(?묒뾽 ?붾젆?좊━)留?諛쏄퀬 **硫붿씤 Claude Code???꾩껜 ?쒖뒪???꾨＼?꾪듃???꾨떖?섏? ?딅뒗??** ?묒뾽 ?꾨즺 ??**TaskOutputTool**???듯빐 ?좏겙 ?샕룸룄援??ъ슜 ?잛닔쨌?뚯슂 ?쒓컙 硫뷀듃由?낵 ?④퍡 寃곌낵瑜?諛섑솚?쒕떎.
+실제 호출 시 메인 에이전트가 Task 도구를 통해 SubAgent를 생성하면, SubAgent는 자체 시스템 프롬프트와 기본 환경 정보(작업 디렉토리)만 받고 **메인 Claude Code의 전체 시스템 프롬프트는 전달되지 않는다.** 작업 완료 시 **TaskOutputTool**을 통해 토큰 수·도구 사용 횟수·소요 시간 메트릭과 함께 결과를 반환한다.
 
-而⑦뀓?ㅽ듃 ?꾨떖? ?섎룄?곸쑝濡?**?⑤갑?Β룰꺽由ы삎**?쇰줈 ?ㅺ퀎?먮떎. 硫붿씤 ?먯씠?꾪듃??Task ?꾧뎄??`prompt` ?꾨뱶瑜??듯빐?쒕쭔 SubAgent??而⑦뀓?ㅽ듃瑜??꾨떖?섍퀬, SubAgent???꾨즺 ???붿빟留?諛섑솚?쒕떎. SubAgent媛 ?먯깋 以?諛쒓껄??以묎컙 肄섑뀗痢좊뒗 硫붿씤 ??붿쓽 而⑦뀓?ㅽ듃瑜??ㅼ뿼?쒗궎吏 ?딅뒗??
+컨텍스트 전달은 의도적으로 **단방향·격리형**으로 설계됐다. 메인 에이전트는 Task 도구의 `prompt` 필드를 통해서만 SubAgent에 컨텍스트를 전달하고, SubAgent는 완료 후 요약만 반환한다. SubAgent가 탐색 중 발견한 중간 콘텐츠는 메인 대화의 컨텍스트를 오염시키지 않는다.
 
 ```mermaid
 sequenceDiagram
-    participant U as ?ъ슜??    participant M as 硫붿씤 ?먯씠?꾪듃
-    participant T as Task ?꾧뎄
+    participant U as 사용자
+    participant M as 메인 에이전트
+    participant T as Task 도구
     participant S as SubAgent
 
-    U->>M: 蹂듭옟???묒뾽 ?붿껌
-    M->>M: description 留ㅼ묶 ?먮떒
-    M->>T: Task ?꾧뎄 ?몄텧 (description, prompt, subagent_type)
-    T->>S: ?낅┰ 而⑦뀓?ㅽ듃濡?SubAgent ?앹꽦 (agentId ?좊떦)
-    S->>S: ?먯껜 ?쒖뒪???꾨＼?꾪듃濡??묒뾽 ?섑뻾
-    Note over S: 理쒕? 240K ?좏겙 ?낅┰ ?뚮퉬
-    S->>T: TaskOutputTool濡?寃곌낵 諛섑솚 (?붿빟 + 硫뷀듃由?
-    T->>M: ?붿빟留??꾨떖 (而⑦뀓?ㅽ듃 蹂댁〈)
-    M->>U: 理쒖쥌 ?묐떟
+    U->>M: 복잡한 작업 요청
+    M->>M: description 매칭 판단
+    M->>T: Task 도구 호출 (description, prompt, subagent_type)
+    T->>S: 독립 컨텍스트로 SubAgent 생성 (agentId 할당)
+    S->>S: 자체 시스템 프롬프트로 작업 수행
+    Note over S: 최대 240K 토큰 독립 소비
+    S->>T: TaskOutputTool로 결과 반환 (요약 + 메트릭)
+    T->>M: 요약만 전달 (컨텍스트 보존)
+    M->>U: 최종 응답
 ```
 
-媛?SubAgent ?ㅽ뻾?먮뒗 怨좎쑀??`agentId`媛 ?좊떦?섎ŉ, ???湲곕줉? 蹂꾨룄 ?몃옖?ㅽ겕由쏀듃 ?뚯씪(`agent-{agentId}.jsonl`)????λ맂?? `resume` ?뚮씪誘명꽣濡??댁쟾 ??붾? ?댁뼱媛????덉뼱 **?ш컻 媛?ν븳(resumable) ?먯씠?꾪듃** ?⑦꽩??吏?먰븳??
+각 SubAgent 실행에는 고유한 `agentId`가 할당되며, 대화 기록은 별도 트랜스크립트 파일(`agent-{agentId}.jsonl`)에 저장된다. `resume` 파라미터로 이전 대화를 이어갈 수 있어 **재개 가능한(resumable) 에이전트** 패턴을 지원한다.
 
-> ?좑툘 **?듭떖 ?꾪궎?띿쿂 ?쒖빟**: SubAgent???ㅻⅨ SubAgent瑜??앹꽦?????녿떎. ?ш???利앹떇??諛⑹??섎뒗 ?섎룄???ㅺ퀎濡? ?꾩엫 源딆씠???뺥솗??1?④퀎濡??쒗븳?쒕떎. ?곗뇙??SubAgent ?ㅽ뻾???꾩슂?섎㈃ 硫붿씤 ??붿뿉???쒖감?곸쑝濡??몄텧?댁빞 ?쒕떎.
+> ⚠️ **핵심 아키텍처 제약**: SubAgent는 다른 SubAgent를 생성할 수 없다. 재귀적 증식을 방지하는 의도적 설계로, 위임 깊이는 정확히 1단계로 제한된다. 연쇄적 SubAgent 실행이 필요하면 메인 대화에서 순차적으로 호출해야 한다.
 
 ---
 
-## ?붿??덉뼱留??꾪궎?띿쿂 ?ъ링 遺꾩꽍
+## 엔지니어링 아키텍처 심층 분석
 
-### 而⑦뀓?ㅽ듃 愿由ъ? ?먮룞 ?뺤텞
+### 컨텍스트 관리와 자동 압축
 
-媛?SubAgent??**?꾩쟾???낅┰??而⑦뀓?ㅽ듃 ?덈룄??*瑜?媛吏硫? ?먯껜?곸쑝濡?**98% ?ъ슜瑜좎뿉???먮룞 ?뺤텞**(auto-compaction)???몃━嫄곕맂?? 硫붿씤 ??붽? ?뺤텞?섏뼱??SubAgent ?몃옖?ㅽ겕由쏀듃?먮뒗 ?곹뼢???녿떎. ?몃옖?ㅽ겕由쏀듃???몄뀡 ?댁뿉??吏?띾릺硫? 湲곕낯 30?????먮룞 ?뺣━?쒕떎(`cleanupPeriodDays`濡??ㅼ젙 媛??. ??寃⑸━ ?뺣텇??SubAgent???섏떗 媛쒖쓽 ?뚯씪怨?臾몄꽌瑜??먯깋?섎㈃?쒕룄 硫붿씤 ??붾? 源⑤걮?섍쾶 ?좎??????덈떎.
+각 SubAgent는 **완전히 독립된 컨텍스트 윈도우**를 가지며, 자체적으로 **98% 사용률에서 자동 압축**(auto-compaction)이 트리거된다. 메인 대화가 압축되어도 SubAgent 트랜스크립트에는 영향이 없다. 트랜스크립트는 세션 내에서 지속되며, 기본 30일 후 자동 정리된다(`cleanupPeriodDays`로 설정 가능). 이 격리 덕분에 SubAgent는 수십 개의 파일과 문서를 탐색하면서도 메인 대화를 깨끗하게 유지할 수 있다.
 
-MCP ?꾧뎄 寃?됱뿉?쒕룄 理쒖쟻?붽? ?곸슜?쒕떎. v2.1.7遺??MCP ?꾧뎄 ?ㅻ챸??而⑦뀓?ㅽ듃 ?덈룄?곗쓽 10%瑜?珥덇낵??寃쎌슦, Claude Code???먮룞?쇰줈 ToolSearch瑜??듯븳 ?⑤뵒留⑤뱶 ?붿뒪而ㅻ쾭由щ줈 ?꾪솚?쒕떎. ??理쒖쟻?붾줈 **?꾩껜 ?먯씠?꾪듃 ?좏겙 ?ъ슜?됱씠 ~46.9% 媛먯냼**?덈떎.
+MCP 도구 검색에서도 최적화가 적용된다. v2.1.7부터 MCP 도구 설명이 컨텍스트 윈도우의 10%를 초과할 경우, Claude Code는 자동으로 ToolSearch를 통한 온디맨드 디스커버리로 전환한다. 이 최적화로 **전체 에이전트 토큰 사용량이 ~46.9% 감소**했다.
 
-### 蹂묐젹 ?ㅽ뻾怨??쒗븳?ы빆
+### 병렬 실행과 제한사항
 
-Claude Code??理쒕? **10媛쒖쓽 ?숈떆 SubAgent ?쒖뒪??*瑜?吏?먰븯硫? 珥덇낵 ?붿껌? 吏?μ쟻 ?먯엵?쇰줈 泥섎━?쒕떎. SubAgent??湲곕낯?곸쑝濡?諛깃렇?쇱슫?쒖뿉???ㅽ뻾?섎ŉ, 硫붿씤 ?먯씠?꾪듃??SubAgent ?ㅽ뻾 以묒뿉???ъ슜???낅젰??諛쏆쓣 ???덈떎. `Ctrl+B`濡??ㅽ뻾 以묒씤 ?쒖뒪?щ? ?섎룞?쇰줈 諛깃렇?쇱슫???꾪솚?????덇퀬, `/tasks` ?ㅼ씠?쇰줈洹몄뿉??紐⑤뱺 ?쒖꽦 諛깃렇?쇱슫???쒖뒪?ъ쓽 ?ㅼ떆媛??곹깭瑜??뺤씤?????덈떎.
+Claude Code는 최대 **10개의 동시 SubAgent 태스크**를 지원하며, 초과 요청은 지능적 큐잉으로 처리한다. SubAgent는 기본적으로 백그라운드에서 실행되며, 메인 에이전트는 SubAgent 실행 중에도 사용자 입력을 받을 수 있다. `Ctrl+B`로 실행 중인 태스크를 수동으로 백그라운드 전환할 수 있고, `/tasks` 다이얼로그에서 모든 활성 백그라운드 태스크의 실시간 상태를 확인할 수 있다.
 
-?ㅻ쭔 諛깃렇?쇱슫??SubAgent?먮뒗 以묒슂???쒗븳???덈떎.
+다만 백그라운드 SubAgent에는 중요한 제한이 있다.
 
-| ??ぉ | 諛깃렇?쇱슫??SubAgent |
+| 항목 | 백그라운드 SubAgent |
 |------|---------------------|
-| MCP ?꾧뎄 ?ъ슜 | ??遺덇? |
-| 誘몄듅??沅뚰븳 ?붿껌 | ???먮룞 嫄곕? |
-| `AskUserQuestion` ?몄텧 | ???ㅽ뙣 (?먯씠?꾪듃??怨꾩냽 吏꾪뻾) |
-| ?닿껐梨?| ?ш렇?쇱슫?쒖뿉???ш컻 |
-| ?꾩쟾 鍮꾪솢?깊솕 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` |
+| MCP 도구 사용 | ❌ 불가 |
+| 미승인 권한 요청 | ❌ 자동 거부 |
+| `AskUserQuestion` 호출 | ❌ 실패 (에이전트는 계속 진행) |
+| 해결책 | 포그라운드에서 재개 |
+| 완전 비활성화 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` |
 
-### ?곹깭 愿由ъ? Hook ?쒖뒪??
-v2.1.16?먯꽌 ?꾩엯??**Tasks ?쒖뒪??*? DAG(諛⑺뼢??鍮꾩닚??洹몃옒?? 湲곕컲 ?섏〈??異붿쟻??吏?먰븳?? `blocks`/`blockedBy` 愿怨꾨줈 ?쒖뒪??媛??좏썑 愿怨꾨? ?뺤쓽?????덉쑝硫? ?곹깭??`~/.claude/tasks/` ?붾젆?좊━????λ맂?? ?꾧뎄 ?ъ슜 ?꾩뿉???꾩옱 ?쒖뒪??紐⑸줉 ?곹깭媛 ?쒖뒪??硫붿떆吏濡??먮룞 二쇱엯?섏뼱 紐⑺몴瑜??껋? ?딅룄濡??쒕떎.
+### 상태 관리와 Hook 시스템
 
-SubAgent ?쇱씠?꾩궗?댄겢? Hook ?쒖뒪?쒓낵 ?곕룞?쒕떎. **SubagentStart**(SubAgent ?앹꽦 ??? **SubagentStop**(?꾨즺 ?? `agent_id`쨌`agent_transcript_path` ?ы븿) ?대깽?몃? ?듯빐 寃곗젙濡좎쟻 ?ㅽ겕由쏀듃瑜??ㅽ뻾?????덈떎.
+v2.1.16에서 도입된 **Tasks 시스템**은 DAG(방향성 비순환 그래프) 기반 의존성 추적을 지원한다. `blocks`/`blockedBy` 관계로 태스크 간 선후 관계를 정의할 수 있으며, 상태는 `~/.claude/tasks/` 디렉토리에 저장된다. 도구 사용 후에는 현재 태스크 목록 상태가 시스템 메시지로 자동 주입되어 목표를 잃지 않도록 한다.
 
-| Hook ?좏삎 | ?ㅻ챸 |
+SubAgent 라이프사이클은 Hook 시스템과 연동된다. **SubagentStart**(SubAgent 생성 시)와 **SubagentStop**(완료 시, `agent_id`·`agent_transcript_path` 포함) 이벤트를 통해 결정론적 스크립트를 실행할 수 있다.
+
+| Hook 유형 | 설명 |
 |-----------|------|
-| `command` | ??紐낅졊 ?ㅽ뻾 |
-| `prompt` | LLM ?꾨＼?꾪듃 ?됯? |
-| `agent` | ?꾧뎄瑜??ъ슜?섎뒗 ?먯씠?꾪듃 寃利앹옄 |
+| `command` | 셸 명령 실행 |
+| `prompt` | LLM 프롬프트 평가 |
+| `agent` | 도구를 사용하는 에이전트 검증자 |
 
-SubAgent??frontmatter?먯꽌??`PreToolUse`쨌`PostToolUse`쨌`Stop` Hook??吏곸젒 ?뺤쓽?????덉쑝硫? ?대떦 SubAgent ?ㅽ뻾???꾨즺?섎㈃ ?먮룞 ?뺣━?쒕떎.
+SubAgent의 frontmatter에서도 `PreToolUse`·`PostToolUse`·`Stop` Hook을 직접 정의할 수 있으며, 해당 SubAgent 실행이 완료되면 자동 정리된다.
 
 ---
 
-## SubAgent 援ъ꽦 諛⑸쾿: ?뚯씪, CLI, SDK
+## SubAgent 구성 방법: 파일, CLI, SDK
 
-### 留덊겕?ㅼ슫 ?뚯씪 湲곕컲 ?뺤쓽
+### 마크다운 파일 기반 정의
 
-SubAgent??YAML frontmatter媛 ?ы븿??留덊겕?ㅼ슫 ?뚯씪濡??뺤쓽?쒕떎. `/agents` 紐낅졊?쇰줈 ??뷀삎 ?앹꽦??媛?ν븯怨? ?섎룞?쇰줈 ?뚯씪???묒꽦???섎룄 ?덈떎.
+SubAgent는 YAML frontmatter가 포함된 마크다운 파일로 정의된다. `/agents` 명령으로 대화형 생성이 가능하고, 수동으로 파일을 작성할 수도 있다.
 
 ```yaml
 ---
@@ -137,109 +139,109 @@ skills: security-checklist
 memory: user
 ---
 
-?뱀떊? ?쒕땲??肄붾뱶 由щ럭?댁엯?덈떎. 肄붾뱶 ?덉쭏, 蹂댁븞, 紐⑤쾾 ?щ???吏묒쨷?섏꽭??
-媛??댁뒋瑜??ㅻ챸?섍퀬, ?꾩옱 肄붾뱶瑜?蹂댁뿬二쇨퀬, 媛쒖꽑??踰꾩쟾???쒓났?섏꽭??
+당신은 시니어 코드 리뷰어입니다. 코드 품질, 보안, 모범 사례에 집중하세요.
+각 이슈를 설명하고, 현재 코드를 보여주고, 개선된 버전을 제공하세요.
 ```
 
-二쇱슂 frontmatter ?꾨뱶???ㅼ쓬怨?媛숇떎.
+주요 frontmatter 필드는 다음과 같다.
 
-| ?꾨뱶 | ?ㅻ챸 | 媛?ν븳 媛?|
+| 필드 | 설명 | 가능한 값 |
 |------|------|-----------|
-| `name` | 怨좎쑀 ?앸퀎??| ?꾩쓽 臾몄옄??|
-| `description` | Claude媛 ?먮룞 ?꾩엫 ?먮떒???ъ슜?섎뒗 ?ㅻ챸 **(?듭떖)** | ?꾩쓽 臾몄옄??|
-| `tools` | ?덉슜 ?꾧뎄 紐⑸줉 (?앸왂 ??MCP ?ы븿 紐⑤뱺 ?꾧뎄 ?곸냽) | `Read, Grep, Glob, Bash, ...` |
-| `disallowedTools` | 嫄곕? ?꾧뎄 紐⑸줉 | `Write, Edit, ...` |
-| `model` | ?ъ슜??紐⑤뜽 | `sonnet` / `opus` / `haiku` / `inherit` |
-| `permissionMode` | 沅뚰븳 紐⑤뱶 | `default` / `acceptEdits` / `bypassPermissions` / `plan` / `ignore` |
-| `skills` | ?먮룞 濡쒕뱶???ㅽ궗 | ?ㅽ궗 ?대쫫 |
-| `memory` | ?몄뀡 媛?吏??硫붾え由??ㅼ퐫??(`MEMORY.md` 泥?200以??먮룞 二쇱엯) | `user` / `project` / `local` |
+| `name` | 고유 식별자 | 임의 문자열 |
+| `description` | Claude가 자동 위임 판단에 사용하는 설명 **(핵심)** | 임의 문자열 |
+| `tools` | 허용 도구 목록 (생략 시 MCP 포함 모든 도구 상속) | `Read, Grep, Glob, Bash, ...` |
+| `disallowedTools` | 거부 도구 목록 | `Write, Edit, ...` |
+| `model` | 사용할 모델 | `sonnet` / `opus` / `haiku` / `inherit` |
+| `permissionMode` | 권한 모드 | `default` / `acceptEdits` / `bypassPermissions` / `plan` / `ignore` |
+| `skills` | 자동 로드할 스킬 | 스킬 이름 |
+| `memory` | 세션 간 지속 메모리 스코프 (`MEMORY.md` 첫 200줄 자동 주입) | `user` / `project` / `local` |
 
-### Tools ?꾩껜 李몄“
+### Tools 전체 참조
 
-`tools` / `disallowedTools` ?꾨뱶??吏?뺥븯??媛믩뱾?대떎. Claude Code?먮뒗 ?ㅼ쓬 ?댁옣 ?꾧뎄?ㅼ씠 ?덉쑝硫? SubAgent???곕씪 ?덉슜 踰붿쐞瑜??쒗븳?섎뒗 寃껋씠 蹂댁븞怨?鍮꾩슜 愿由ъ쓽 ?듭떖?대떎.
+`tools` / `disallowedTools` 필드에 지정하는 값들이다. Claude Code에는 다음 내장 도구들이 있으며, SubAgent에 따라 허용 범위를 제한하는 것이 보안과 비용 관리의 핵심이다.
 
-#### ?뚯씪 ?먯깋 ?꾧뎄
+#### 파일 탐색 도구
 
-| ?꾧뎄 | ?⑸룄 | 二쇱슂 ?뚮씪誘명꽣 | SubAgent 沅뚯옣 ?щ? |
+| 도구 | 용도 | 주요 파라미터 | SubAgent 권장 여부 |
 |------|------|--------------|:-----------------:|
-| **Glob** | ?뚯씪紐??⑦꽩?쇰줈 ?뚯씪 李얘린 | `pattern` (?꾩닔), `path` (?듭뀡) | ???먯깋 ?꾩슜 |
-| **Grep** | ?뚯씪 ?댁슜?먯꽌 ?띿뒪???뺢퇋??寃??(ripgrep 湲곕컲) | `pattern`, `output_mode`, `glob`, `type`, `-A/-B/-C` | ???먯깋 ?꾩슜 |
-| **LS** | ?붾젆?좊━ 紐⑸줉 議고쉶 | `path` | ???먯깋 ?꾩슜 |
+| **Glob** | 파일명 패턴으로 파일 찾기 | `pattern` (필수), `path` (옵션) | ✅ 탐색 전용 |
+| **Grep** | 파일 내용에서 텍스트/정규식 검색 (ripgrep 기반) | `pattern`, `output_mode`, `glob`, `type`, `-A/-B/-C` | ✅ 탐색 전용 |
+| **LS** | 디렉토리 목록 조회 | `path` | ✅ 탐색 전용 |
 
-**Glob vs Grep ?좏깮 湲곗?:**
-- ?뚯씪紐낆쑝濡?李얠쓣 ????`Glob` (`**/*.kt`, `src/**/*.java`)
-- ?뚯씪 ?덉쓽 ?댁슜?쇰줈 李얠쓣 ????`Grep` (`pattern: "class Foo"`)
-- ?볦? 踰붿쐞???먯깋???꾩슂??????`Task` ?꾧뎄濡?Explore SubAgent ?꾩엫
+**Glob vs Grep 선택 기준:**
+- 파일명으로 찾을 때 → `Glob` (`**/*.kt`, `src/**/*.java`)
+- 파일 안의 내용으로 찾을 때 → `Grep` (`pattern: "class Foo"`)
+- 넓은 범위의 탐색이 필요할 때 → `Task` 도구로 Explore SubAgent 위임
 
-#### ?뚯씪 ?쎄린/?곌린 ?꾧뎄
+#### 파일 읽기/쓰기 도구
 
-| ?꾧뎄 | ?⑸룄 | 二쇱슂 ?뚮씪誘명꽣 | 二쇱쓽?ы빆 |
+| 도구 | 용도 | 주요 파라미터 | 주의사항 |
 |------|------|--------------|----------|
-| **Read** | ?뚯씪 ?쎄린 (?띿뒪?? ?대?吏, PDF, Jupyter ?명듃遺?吏?? | `file_path` (?꾩닔), `offset`, `limit` | 2000以?湲곕낯 ?쒗븳, 2000??珥덇낵 以꾩? ?섎┝ |
-| **Write** | ???뚯씪 ?앹꽦 ?먮뒗 ?꾩껜 ??뼱?곌린 | `file_path`, `content` | 湲곗〈 ?댁슜 ?꾩쟾 援먯껜 二쇱쓽 |
-| **Edit** | ?뚯씪 ???뱀젙 臾몄옄??援먯껜 (?⑥씪) | `file_path`, `old_string`, `new_string` | `old_string`???뚯씪???뺥솗??1??議댁옱?댁빞 ??|
-| **MultiEdit** | ?뚯씪 ???щ윭 ?꾩튂 ?쇨큵 援먯껜 | `file_path`, `edits[]` | ?щ윭 ?섏젙????踰덉뿉 泥섎━ |
-| **NotebookRead** | Jupyter ?명듃遺??쎄린 | `notebook_path` | ? + 異쒕젰 ?ы븿 |
-| **NotebookEdit** | Jupyter ?명듃遺?? ?몄쭛 | `notebook_path`, `cell_id`, `new_source` | |
+| **Read** | 파일 읽기 (텍스트, 이미지, PDF, Jupyter 노트북 지원) | `file_path` (필수), `offset`, `limit` | 2000줄 기본 제한, 2000자 초과 줄은 잘림 |
+| **Write** | 새 파일 생성 또는 전체 덮어쓰기 | `file_path`, `content` | 기존 내용 완전 교체 주의 |
+| **Edit** | 파일 내 특정 문자열 교체 (단일) | `file_path`, `old_string`, `new_string` | `old_string`이 파일에 정확히 1회 존재해야 함 |
+| **MultiEdit** | 파일 내 여러 위치 일괄 교체 | `file_path`, `edits[]` | 여러 수정을 한 번에 처리 |
+| **NotebookRead** | Jupyter 노트북 읽기 | `notebook_path` | 셀 + 출력 포함 |
+| **NotebookEdit** | Jupyter 노트북 셀 편집 | `notebook_path`, `cell_id`, `new_source` | |
 
-> ?뮕 **Bash ????꾩슜 ?꾧뎄 ?ъ슜 ?먯튃**: `cat` ???`Read`, `grep` ???`Grep`, `find` ???`Glob`, `sed/awk` ???`Edit`, `echo >` ???`Write`瑜??ъ슜?섎뒗 寃껋씠 Claude Code??怨듭떇 沅뚯옣 ?ы빆?대떎.
+> 💡 **Bash 대신 전용 도구 사용 원칙**: `cat` 대신 `Read`, `grep` 대신 `Grep`, `find` 대신 `Glob`, `sed/awk` 대신 `Edit`, `echo >` 대신 `Write`를 사용하는 것이 Claude Code의 공식 권장 사항이다.
 
-#### ?ㅽ뻾 ?꾧뎄
+#### 실행 도구
 
-| ?꾧뎄 | ?⑸룄 | 二쇱슂 ?뚮씪誘명꽣 | 二쇱쓽?ы빆 |
+| 도구 | 용도 | 주요 파라미터 | 주의사항 |
 |------|------|--------------|----------|
-| **Bash** | ??紐낅졊 ?ㅽ뻾 (?곸냽 ?몄뀡) | `command` (?꾩닔), `description`, `timeout` (理쒕? 600000ms), `run_in_background` | ?뚯씪 ?묒뾽? ?꾩슜 ?꾧뎄 ?곗꽑 ?ъ슜 |
-| **BashOutput** | 諛깃렇?쇱슫??Bash 寃곌낵 ?쎄린 | `background_task_id` | `run_in_background: true`濡??ㅽ뻾??紐낅졊??寃곌낵 議고쉶 |
-| **KillShell** | 諛깃렇?쇱슫???꾨줈?몄뒪 醫낅즺 | `pid` | |
+| **Bash** | 셸 명령 실행 (영속 세션) | `command` (필수), `description`, `timeout` (최대 600000ms), `run_in_background` | 파일 작업은 전용 도구 우선 사용 |
+| **BashOutput** | 백그라운드 Bash 결과 읽기 | `background_task_id` | `run_in_background: true`로 실행한 명령의 결과 조회 |
+| **KillShell** | 백그라운드 프로세스 종료 | `pid` | |
 
-#### ?먯씠?꾪듃쨌?쒖뒪???꾧뎄
+#### 에이전트·태스크 도구
 
-| ?꾧뎄 | ?⑸룄 | 二쇱슂 ?뚮씪誘명꽣 |
+| 도구 | 용도 | 주요 파라미터 |
 |------|------|--------------|
-| **Task** | SubAgent ?앹꽦 諛??꾩엫 | `subagent_type`, `prompt`, `description`, `resume` |
-| **TodoRead** | ?꾩옱 ?쒖뒪??紐⑸줉 ?쎄린 | ??|
-| **TodoWrite** | ?쒖뒪??紐⑸줉 ?앹꽦/?낅뜲?댄듃 | `todos[]` |
+| **Task** | SubAgent 생성 및 위임 | `subagent_type`, `prompt`, `description`, `resume` |
+| **TodoRead** | 현재 태스크 목록 읽기 | — |
+| **TodoWrite** | 태스크 목록 생성/업데이트 | `todos[]` |
 
-#### ???꾧뎄
+#### 웹 도구
 
-| ?꾧뎄 | ?⑸룄 | 二쇱슂 ?뚮씪誘명꽣 |
+| 도구 | 용도 | 주요 파라미터 |
 |------|------|--------------|
-| **WebSearch** | ??寃??| `query` |
-| **WebFetch** | ?뱀젙 URL ?섏씠吏 媛?몄삤湲?| `url` |
+| **WebSearch** | 웹 검색 | `query` |
+| **WebFetch** | 특정 URL 페이지 가져오기 | `url` |
 
-#### 湲고? ?꾧뎄
+#### 기타 도구
 
-| ?꾧뎄 | ?⑸룄 |
+| 도구 | 용도 |
 |------|------|
-| **ExitPlanMode** (= `exit_plan_mode`) | Plan Mode 醫낅즺, ?ㅽ뻾 ?④퀎濡??꾪솚 |
-| **SlashCommand** | ?щ옒??而ㅻ㎤???ㅽ뻾 |
+| **ExitPlanMode** (= `exit_plan_mode`) | Plan Mode 종료, 실행 단계로 전환 |
+| **SlashCommand** | 슬래시 커맨드 실행 |
 
-#### ??븷蹂?沅뚯옣 ?꾧뎄 議고빀
+#### 역할별 권장 도구 조합
 
-而ㅻ??덊떚(VoltAgent 100+ SubAgent 遺꾩꽍)?먯꽌 ?섎졃????븷蹂??쒖? ?꾧뎄 議고빀?대떎.
+커뮤니티(VoltAgent 100+ SubAgent 분석)에서 수렴된 역할별 표준 도구 조합이다.
 
-| SubAgent ??븷 | 沅뚯옣 tools | 諛곗젣??tools |
+| SubAgent 역할 | 권장 tools | 배제할 tools |
 |--------------|-----------|-------------|
-| ?쎄린 ?꾩슜 由щ럭??(肄붾뱶 由щ럭, 媛먯궗) | `Read, Grep, Glob` | `Write, Edit, Bash` |
-| 由ъ꽌移샕룸텇??| `Read, Grep, Glob, WebFetch, WebSearch` | `Write, Edit` |
-| 肄붾뱶 ?묒꽦쨌媛쒕컻 | `Read, Write, Edit, Bash, Glob, Grep` | ??|
-| ?뚯뒪???ㅽ뻾 | `Read, Bash, Grep, Glob` | `Write, Edit` |
-| 臾몄꽌 ?묒꽦 | `Read, Write, Glob, Grep` | `Bash` |
-| ?먯깋 ?꾩슜 (Explore ?좏삎) | `Glob, Grep, Read, Bash` (?쎄린 ?꾩슜 Bash留? | `Write, Edit, MultiEdit` |
+| 읽기 전용 리뷰어 (코드 리뷰, 감사) | `Read, Grep, Glob` | `Write, Edit, Bash` |
+| 리서치·분석 | `Read, Grep, Glob, WebFetch, WebSearch` | `Write, Edit` |
+| 코드 작성·개발 | `Read, Write, Edit, Bash, Glob, Grep` | — |
+| 테스트 실행 | `Read, Bash, Grep, Glob` | `Write, Edit` |
+| 문서 작성 | `Read, Write, Glob, Grep` | `Bash` |
+| 탐색 전용 (Explore 유형) | `Glob, Grep, Read, Bash` (읽기 전용 Bash만) | `Write, Edit, MultiEdit` |
 
 ---
 
-?뚯씪 ????꾩튂???곕씪 ?곗꽑?쒖쐞媛 ?щ씪吏꾨떎.
+파일 저장 위치에 따라 우선순위가 달라진다.
 
-| ?꾩튂 | 寃쎈줈 | ?곗꽑?쒖쐞 | ?뱀쭠 |
+| 위치 | 경로 | 우선순위 | 특징 |
 |------|------|----------|------|
-| ?꾨줈?앺듃 SubAgent | `.claude/agents/` | ?쪍 理쒓퀬 | ?怨?怨듭쑀 媛??|
-| ?ъ슜??SubAgent | `~/.claude/agents/` | ?쪎 | 紐⑤뱺 ?꾨줈?앺듃?먯꽌 ?ъ슜 |
-| ?뚮윭洹몄씤 ?먯씠?꾪듃 | `plugin-root/agents/` | ?쪎 (?숆툒) | ?뚮윭洹몄씤 踰덈뱾 ?ы븿 |
+| 프로젝트 SubAgent | `.claude/agents/` | 🥇 최고 | 팀과 공유 가능 |
+| 사용자 SubAgent | `~/.claude/agents/` | 🥈 | 모든 프로젝트에서 사용 |
+| 플러그인 에이전트 | `plugin-root/agents/` | 🥈 (동급) | 플러그인 번들 포함 |
 
-### CLI? SDK瑜??듯븳 ?꾨줈洹몃옒諛띿쟻 ?뺤쓽
+### CLI와 SDK를 통한 프로그래밍적 정의
 
-`--agents` CLI ?뚮옒洹몃줈 JSON ?뺥깭??SubAgent瑜??몄뀡??二쇱엯?????덈떎:
+`--agents` CLI 플래그로 JSON 형태의 SubAgent를 세션에 주입할 수 있다:
 
 ```bash
 claude --agents '{
@@ -252,19 +254,19 @@ claude --agents '{
 }'
 ```
 
-SDK(Python/TypeScript)?먯꽌??`AgentDefinition` 媛앹껜濡??뺤쓽?쒕떎:
+SDK(Python/TypeScript)에서는 `AgentDefinition` 객체로 정의한다:
 
 ```python
 from claude_agent_sdk import query, ClaudeAgentOptions, AgentDefinition
 
 async for message in query(
-    prompt="?몄쬆 紐⑤뱢??由щ럭?댁＜?몄슂",
+    prompt="인증 모듈을 리뷰해주세요",
     options=ClaudeAgentOptions(
         allowed_tools=["Read", "Grep", "Glob", "Task"],
         agents={
             "code-reviewer": AgentDefinition(
                 description="Expert code reviewer",
-                prompt="?뱀떊? ?쒕땲??肄붾뱶 由щ럭?댁엯?덈떎...",
+                prompt="당신은 시니어 코드 리뷰어입니다...",
                 tools=["Read", "Grep", "Glob"],
                 model="sonnet"
             )
@@ -273,236 +275,251 @@ async for message in query(
 ): ...
 ```
 
-MCP ?꾧뎄 ?묎렐? `mcp__{?쒕쾭紐?__{?꾧뎄紐?` 紐낅챸洹쒖튃???ъ슜?섎ŉ ??쇰뱶移대뱶(`mcp__github__*`)??吏?먰븳??
+MCP 도구 접근은 `mcp__{서버명}__{도구명}` 명명규칙을 사용하며 와일드카드(`mcp__github__*`)도 지원한다.
 
-### CLAUDE.md???愿怨?
-以묒슂???먯?, **CLAUDE.md???댁슜??SubAgent???먮룞 ?꾪뙆?섏? ?딅뒗??*??寃껋씠?? 怨듭떇 臾몄꽌?먯꽌??SubAgent媛 ?꾨줈?앺듃??CLAUDE.md 吏移⑥쓣 ?곸냽?쒕떎怨??멸툒?섏?留? ?ㅼ젣 GitHub ?댁뒋([#8395](https://github.com/anthropics/claude-code/issues/8395), [#18352](https://github.com/anthropics/claude-code/issues/18352))?먯꽌 ?ъ슜?먮뱾? ???숈옉??遺덉셿?꾪븯?ㅺ퀬 蹂닿퀬?섍퀬 ?덈떎.
+### CLAUDE.md와의 관계
 
-| ?닿껐梨?| ?ㅻ챸 | 沅뚯옣 ?щ? |
+중요한 점은, **CLAUDE.md의 내용이 SubAgent에 자동 전파되지 않는다**는 것이다. 공식 문서에서는 SubAgent가 프로젝트의 CLAUDE.md 지침을 상속한다고 언급하지만, 실제 GitHub 이슈([#8395](https://github.com/anthropics/claude-code/issues/8395), [#18352](https://github.com/anthropics/claude-code/issues/18352))에서 사용자들은 이 동작이 불완전하다고 보고하고 있다.
+
+| 해결책 | 설명 | 권장 여부 |
 |--------|------|-----------|
-| ?쒖뒪???꾨＼?꾪듃??吏곸젒 ?ы븿 | 媛?SubAgent `.md` ?뚯씪 蹂몃Ц??洹쒖튃 紐낆떆 | ??媛???뺤떎 |
-| `skills` ?꾨뱶濡?怨듯넻 ?ㅽ궗 濡쒕뱶 | 怨듯넻 洹쒖튃???ㅽ궗 ?뚯씪濡?遺꾨━ ???먮룞 濡쒕뱶 | ???ъ궗?⑹꽦 ?믪쓬 |
-| `context: fork` ?쒖슜 (v2.1+) | Skill??SubAgent 而⑦뀓?ㅽ듃???먮룞 二쇱엯?섎뒗 諛⑹떇?쇰줈 ?고쉶 | ??媛???곗븘???대쾿 |
-| CLAUDE.md ?곸냽 湲곕? | ?꾩옱 遺덉셿?꾪븯寃??숈옉 | ??鍮꾧텒??|
+| 시스템 프롬프트에 직접 포함 | 각 SubAgent `.md` 파일 본문에 규칙 명시 | ✅ 가장 확실 |
+| `skills` 필드로 공통 스킬 로드 | 공통 규칙을 스킬 파일로 분리 후 자동 로드 | ✅ 재사용성 높음 |
+| `context: fork` 활용 (v2.1+) | Skill이 SubAgent 컨텍스트에 자동 주입되는 방식으로 우회 | ✅ 가장 우아한 해법 |
+| CLAUDE.md 상속 기대 | 현재 불완전하게 동작 | ❌ 비권장 |
 
-### context: fork ??Skills? SubAgent??援먯감??(v2.1+)
+### context: fork — Skills와 SubAgent의 교차점 (v2.1+)
 
-Claude Code 2.1?먯꽌 異붽???`context: fork`??CLAUDE.md 誘몄쟾??臾몄젣瑜?援ъ“?곸쑝濡??닿껐?섎뒗 媛???곗븘??諛⑸쾿?대떎. ?ㅽ궗 frontmatter??`context: fork`瑜??좎뼵?섎㈃, 洹??ㅽ궗? ?낅┰??SubAgent 而⑦뀓?ㅽ듃?먯꽌 ?ㅽ뻾?섎ŉ ?ㅽ궗 ?댁슜???대떦 SubAgent???쒖뒪???꾨＼?꾪듃???먮룞 二쇱엯?쒕떎.
+Claude Code 2.1에서 추가된 `context: fork`는 CLAUDE.md 미전파 문제를 구조적으로 해결하는 가장 우아한 방법이다. 스킬 frontmatter에 `context: fork`를 선언하면, 그 스킬은 독립된 SubAgent 컨텍스트에서 실행되며 스킬 내용이 해당 SubAgent의 시스템 프롬프트에 자동 주입된다.
 
-?닿쾬? **"SubAgent ?덉뿉???ㅽ궗 ?ㅽ뻾"????갑??愿怨?*?? Skills in a subagent?먯꽌??SubAgent媛 ?쒖뒪???꾨＼?꾪듃瑜??쒖뼱?섍퀬 ?ㅽ궗 ?댁슜??濡쒕뱶?쒕떎. `context: fork` in a skill?먯꽌???ㅽ궗 ?댁슜??吏?뺥븳 ?먯씠?꾪듃??二쇱엯?쒕떎. ????媛숈? ?대? ?쒖뒪?쒖쓣 ?ъ슜?쒕떎.
+이것은 **"SubAgent 안에서 스킬 실행"의 역방향 관계**다. Skills in a subagent에서는 SubAgent가 시스템 프롬프트를 제어하고 스킬 내용을 로드한다. `context: fork` in a skill에서는 스킬 내용이 지정한 에이전트에 주입된다. 둘 다 같은 내부 시스템을 사용한다.
 
 ```yaml
 # .claude/skills/project-conventions.md
 ---
 name: project-conventions
-description: ?꾨줈?앺듃 怨듯넻 洹쒖튃 (Kotlin 而⑤깽?? ?꾪궎?띿쿂 ?⑦꽩 ??
+description: 프로젝트 공통 규칙 (Kotlin 컨벤션, 아키텍처 패턴 등)
 context: fork
-agent: code-reviewer   # 二쇱엯???먯씠?꾪듃 ???吏??allowed_tools:
+agent: code-reviewer   # 주입할 에이전트 타입 지정
+allowed_tools:
   - Read
-  - Grep               # ?꾩슂???꾧뎄留??덉슜
+  - Grep               # 필요한 도구만 허용
 ---
 
-# ?ш린??CLAUDE.md???ｌ뿀??洹쒖튃?ㅼ쓣 ?묒꽦
-- Kotlin 肄붾뵫 而⑤깽??- Clean Architecture ?덉씠??洹쒖튃
-- ?뚯뒪???묒꽦 湲곗? (JUnit5, MockK)
+# 여기에 CLAUDE.md에 넣었던 규칙들을 작성
+- Kotlin 코딩 컨벤션
+- Clean Architecture 레이어 규칙
+- 테스트 작성 기준 (JUnit5, MockK)
 ```
 
-`context: fork`瑜??ъ슜?섎㈃ 而⑦뀓?ㅽ듃 ?먮쫫???щ씪吏꾨떎.
+`context: fork`를 사용하면 컨텍스트 흐름이 달라진다.
 
 ```
-湲곗〈: CLAUDE.md 洹쒖튃 ??硫붿씤 ?먯씠?꾪듃 (?? / SubAgent (???꾪뙆 ????
+기존: CLAUDE.md 규칙 → 메인 에이전트 (✅) / SubAgent (❌ 전파 안 됨)
 
-context: fork ?ъ슜:
-  怨듯넻 洹쒖튃 ??Skill ?뚯씪???묒꽦
-             ??context: fork濡??몄텧 ??             ??Skill ?댁슜??SubAgent ?쒖뒪???꾨＼?꾪듃??二쇱엯 (??
+context: fork 사용:
+  공통 규칙 → Skill 파일에 작성
+             → context: fork로 호출 시
+             → Skill 내용이 SubAgent 시스템 프롬프트에 주입 (✅)
 ```
 
-??諛⑹떇???듭떖 ?μ젏? CLAUDE.md???꾨줈?앺듃 洹쒖튃??媛?SubAgent??蹂듬텤?섎뒗 ??? **Skill??洹쒖튃???대컲泥???븷**???섎?濡???怨녹뿉??愿由ы븷 ???덈떎???먯씠?? 洹쒖튃??諛붾뚮㈃ Skill ?뚯씪留??섏젙?섎㈃ ?쒕떎.
+이 방식의 핵심 장점은 CLAUDE.md의 프로젝트 규칙을 각 SubAgent에 복붙하는 대신, **Skill이 규칙의 운반체 역할**을 하므로 한 곳에서 관리할 수 있다는 점이다. 규칙이 바뀌면 Skill 파일만 수정하면 된다.
 
-`context: fork`濡?吏??媛?ν븳 ?먯씠?꾪듃 ??낆? ?ㅼ쓬怨?媛숇떎.
+`context: fork`로 지정 가능한 에이전트 타입은 다음과 같다.
 
-| `agent` 媛?| ?ㅻ챸 |
+| `agent` 값 | 설명 |
 |------------|------|
-| `general-purpose` | 湲곕낯媛? ?꾩껜 ?꾧뎄 ?묎렐 |
-| `Plan` | 怨꾪쉷쨌?ㅺ퀎 ?뱁솕 |
-| `Explore` | 肄붾뱶踰좎씠???먯깋 ?뱁솕 (Haiku 紐⑤뜽, ?쎄린 ?꾩슜) |
-| 而ㅼ뒪? ?먯씠?꾪듃 ?대쫫 | `.claude/agents/`???뺤쓽???ъ슜???뺤쓽 ?먯씠?꾪듃 |
+| `general-purpose` | 기본값, 전체 도구 접근 |
+| `Plan` | 계획·설계 특화 |
+| `Explore` | 코드베이스 탐색 특화 (Haiku 모델, 읽기 전용) |
+| 커스텀 에이전트 이름 | `.claude/agents/`에 정의한 사용자 정의 에이전트 |
 
-> ?좑툘 **?뚮젮吏?踰꾧렇 (GitHub ?댁뒋 #17283)**: Skill ?꾧뎄瑜??듯빐 ?몄텧????`context: fork`? `agent:` ?꾨뱶媛 臾댁떆?섍퀬 硫붿씤 ???而⑦뀓?ㅽ듃?먯꽌 ?ㅽ뻾?섎뒗 踰꾧렇媛 蹂닿퀬???덈떎. 2025??1??湲곗? ?꾩쭅 ?꾩쟾???덉젙?붾맂 湲곕뒫? ?꾨땲誘濡? 以묒슂???뚰겕?뚮줈?곗뿉 ?곸슜 ??諛섎뱶???숈옉??寃利앺빐???쒕떎.
+> ⚠️ **알려진 버그 (GitHub 이슈 #17283)**: Skill 도구를 통해 호출할 때 `context: fork`와 `agent:` 필드가 무시되고 메인 대화 컨텍스트에서 실행되는 버그가 보고돼 있다. 2025년 1월 기준 아직 완전히 안정화된 기능은 아니므로, 중요한 워크플로우에 적용 전 반드시 동작을 검증해야 한다.
 
-### Skills, Commands, SubAgents???섎졃 (v2.1????洹몃┝)
+### Skills, Commands, SubAgents의 수렴 (v2.1의 큰 그림)
 
-`context: fork`???⑥닚??湲곕뒫 異붽?媛 ?꾨땲??Claude Code ?꾪궎?띿쿂??諛⑺뼢??蹂댁뿬以?? 湲곗〈?먮뒗 Skills(硫붿씤 而⑦뀓?ㅽ듃 ?ㅽ뻾) vs SubAgents(寃⑸━ 而⑦뀓?ㅽ듃 ?ㅽ뻾)媛 ?꾩쟾??蹂꾧컻??異붿긽?붿??? `context: main | fork` ?ㅼ쐞移??섎굹濡? ?댁젣 媛숈? 濡쒖쭅??硫붿씤 而⑦뀓?ㅽ듃?먯꽌 ?ㅽ뻾?좎? 寃⑸━??而⑦뀓?ㅽ듃?먯꽌 ?ㅽ뻾?좎?瑜??좏깮?????덈떎. Skills? SubAgents媛 ?섎굹??異붿긽?붾줈 ?섎졃?섎뒗 怨쇱젙???덈떎.
+`context: fork`는 단순한 기능 추가가 아니라 Claude Code 아키텍처의 방향을 보여준다. 기존에는 Skills(메인 컨텍스트 실행) vs SubAgents(격리 컨텍스트 실행)가 완전히 별개의 추상화였다. `context: main | fork` 스위치 하나로, 이제 같은 로직을 메인 컨텍스트에서 실행할지 격리된 컨텍스트에서 실행할지를 선택할 수 있다. Skills와 SubAgents가 하나의 추상화로 수렴하는 과정에 있다.
 
 ---
 
-## Skills ?꾩쟾 媛?대뱶
+## Skills 완전 가이드
 
-### Skills? 臾댁뾿?멸??
+### Skills란 무엇인가?
 
-Skills??Claude Code??**?꾨찓???뱁솕 吏?씲룹썙?ы뵆濡쒖슦쨌?꾧뎄 ?듯빀 ?λ젰??二쇱엯?섎뒗 ?ъ궗??媛?ν븳 ?⑦궎吏**?? "?꾨Ц媛 ?⑤낫??媛?대뱶"泥섎읆 ?앷컖?섎㈃ ?쒕떎. 諛섎났?곸쑝濡?媛숈? 吏移⑥쓣 ?꾨＼?꾪듃???ｋ뒗 ??? ??踰??묒꽦?대몢硫?Claude媛 愿???곹솴??媛먯????뚮쭏???먮룞?쇰줈 濡쒕뱶?쒕떎.
+Skills는 Claude Code에 **도메인 특화 지식·워크플로우·도구 통합 능력을 주입하는 재사용 가능한 패키지**다. "전문가 온보딩 가이드"처럼 생각하면 된다. 반복적으로 같은 지침을 프롬프트에 넣는 대신, 한 번 작성해두면 Claude가 관련 상황을 감지할 때마다 자동으로 로드한다.
 
-湲곗닠?곸쑝濡쒕뒗 **"?⑤뵒留⑤뱶 ?꾨＼?꾪듃 ?뺤옣"** 硫붿빱?덉쬁?대떎. ?쒖옉 ?쒖젏??紐⑤뱺 ?ㅽ궗??`name`怨?`description`留??쒖뒪???꾨＼?꾪듃??濡쒕뱶?쒕떎. ?ㅼ젣 `SKILL.md` 蹂몃Ц? Claude媛 ?대떦 ?ㅽ궗???좏깮?덉쓣 ?뚮쭔 ?쎌뼱?ㅻ?濡? **濡쒕뱶???ㅽ궗 ?섏뿉 愿怨꾩뾾??而⑦뀓?ㅽ듃 ?⑤꼸?곌? ?녿떎.**
+기술적으로는 **"온디맨드 프롬프트 확장"** 메커니즘이다. 시작 시점에 모든 스킬의 `name`과 `description`만 시스템 프롬프트에 로드된다. 실제 `SKILL.md` 본문은 Claude가 해당 스킬을 선택했을 때만 읽어오므로, **로드된 스킬 수에 관계없이 컨텍스트 패널티가 없다.**
 
 ```mermaid
 sequenceDiagram
-    participant U as ?ъ슜??    participant C as Claude
+    participant U as 사용자
+    participant C as Claude
     participant S as Skill Tool
 
-    Note over C: ?쒖옉 ?? 紐⑤뱺 ?ㅽ궗??name+description留?濡쒕뱶
-    U->>C: "??PDF?먯꽌 ?쒕? 異붿텧?댁쨾"
-    C->>C: available_skills 紐⑸줉?먯꽌 留ㅼ묶 ?먮떒
-    C->>S: Skill("pdf-processing") ?몄텧
-    S->>C: SKILL.md 蹂몃Ц 二쇱엯 (?꾩슂???뚯씪留?
-    C->>U: ?ㅽ궗 吏移⑥뿉 ?곕씪 ?묒뾽 ?섑뻾
+    Note over C: 시작 시: 모든 스킬의 name+description만 로드
+    U->>C: "이 PDF에서 표를 추출해줘"
+    C->>C: available_skills 목록에서 매칭 판단
+    C->>S: Skill("pdf-processing") 호출
+    S->>C: SKILL.md 본문 주입 (필요한 파일만)
+    C->>U: 스킬 지침에 따라 작업 수행
 ```
 
-### Skills vs SubAgent: ?몄젣 臾댁뾿???멸퉴?
+### Skills vs SubAgent: 언제 무엇을 쓸까?
 
-| 鍮꾧탳 ??ぉ | Skills | SubAgent |
+| 비교 항목 | Skills | SubAgent |
 |-----------|--------|----------|
-| **?ㅽ뻾 而⑦뀓?ㅽ듃** | 硫붿씤 ???(湲곕낯媛? | 寃⑸━???낅┰ 而⑦뀓?ㅽ듃 |
-| **以묎컙 寃곌낵** | 硫붿씤 ??붿뿉 ?몄텧 | ?붿빟留?諛섑솚, 硫붿씤 ???蹂댁〈 |
-| **?ъ궗??* | 紐⑤뱺 ??붿뿉???먮룞 濡쒕뱶 | ?몄뀡 ???꾩엫 |
-| **二쇱슂 ?⑸룄** | 吏?씲룰퇋移쇑룹썙?ы뵆濡쒖슦 二쇱엯 | 蹂듭옟???묒뾽 寃⑸━쨌?꾩엫 |
-| **?뚯씪 援ъ“** | ?붾젆?좊━ (`skill-name/SKILL.md`) | ?⑥씪 `.md` ?뚯씪 |
-| **而⑦뀓?ㅽ듃 鍮꾩슜** | 蹂몃Ц? ?⑤뵒留⑤뱶 濡쒕뱶 ????쓬 | ?낅┰ 而⑦뀓?ㅽ듃 ?덈룄?????믪쓬 |
-| **而⑦뀓?ㅽ듃 寃⑸━ ?꾩슂** | ??| ??|
-| **?곹깭 ?좎?** | `memory` ?꾨뱶濡?媛??| ?몄뀡 ?댁뿉?쒕쭔 |
+| **실행 컨텍스트** | 메인 대화 (기본값) | 격리된 독립 컨텍스트 |
+| **중간 결과** | 메인 대화에 노출 | 요약만 반환, 메인 대화 보존 |
+| **재사용** | 모든 대화에서 자동 로드 | 세션 내 위임 |
+| **주요 용도** | 지식·규칙·워크플로우 주입 | 복잡한 작업 격리·위임 |
+| **파일 구조** | 디렉토리 (`skill-name/SKILL.md`) | 단일 `.md` 파일 |
+| **컨텍스트 비용** | 본문은 온디맨드 로드 → 낮음 | 독립 컨텍스트 윈도우 → 높음 |
+| **컨텍스트 격리 필요** | ❌ | ✅ |
+| **상태 유지** | `memory` 필드로 가능 | 세션 내에서만 |
 
-**Skills媛 ???곹빀??寃쎌슦:**
-- 肄붾뵫 而⑤깽?? ?꾪궎?띿쿂 ?⑦꽩, ? 洹쒖튃??Claude?먭쾶 二쇱엯????- 硫붿씤 ????먮쫫???좎??섎㈃???꾨Ц 吏?앸쭔 異붽??섍퀬 ?띠쓣 ??- ?꾨줈?앺듃 ?꾨컲?먯꽌 諛섎났?섎뒗 吏㏃? ?뚰겕?뚮줈??(`/commit`, `/review`)
+**Skills가 더 적합한 경우:**
+- 코딩 컨벤션, 아키텍처 패턴, 팀 규칙을 Claude에게 주입할 때
+- 메인 대화 흐름을 유지하면서 전문 지식만 추가하고 싶을 때
+- 프로젝트 전반에서 반복되는 짧은 워크플로우 (`/commit`, `/review`)
 
-**SubAgent媛 ???곹빀??寃쎌슦:**
-- ??됱쓽 ?뚯씪 ?먯깋쨌遺꾩꽍 寃곌낵瑜?硫붿씤 ??붿뿉??寃⑸━?섍퀬 ?띠쓣 ??- 蹂묐젹 ?ㅽ뻾???꾩슂???낅┰?곸씤 ?묒뾽??
-### ?붾젆?좊━ 援ъ“
+**SubAgent가 더 적합한 경우:**
+- 대량의 파일 탐색·분석 결과를 메인 대화에서 격리하고 싶을 때
+- 병렬 실행이 필요한 독립적인 작업들
+
+### 디렉토리 구조
 
 ```
 skill-name/
-?쒋?? SKILL.md           ???꾩닔: frontmatter + 吏移??쒋?? scripts/           ???듭뀡: Python/Bash ?ㅽ뻾 ?ㅽ겕由쏀듃
-??  ?붴?? extract.py
-?쒋?? references/        ???듭뀡: ?꾩슂 ??濡쒕뱶?섎뒗 李몄“ 臾몄꽌
-??  ?쒋?? api-spec.md
-??  ?붴?? patterns.md
-?붴?? assets/            ???듭뀡: 異쒕젰???ъ슜?섎뒗 ?쒗뵆由온룻룿????    ?붴?? template.docx
+├── SKILL.md           ← 필수: frontmatter + 지침
+├── scripts/           ← 옵션: Python/Bash 실행 스크립트
+│   └── extract.py
+├── references/        ← 옵션: 필요 시 로드되는 참조 문서
+│   ├── api-spec.md
+│   └── patterns.md
+└── assets/            ← 옵션: 출력에 사용되는 템플릿·폰트 등
+    └── template.docx
 ```
 
-????꾩튂:
-- **?ъ슜???꾩뿭**: `~/.claude/skills/skill-name/`
-- **?꾨줈?앺듃 ?꾩슜**: `.claude/skills/skill-name/`
-- `--add-dir` ?뚮옒洹몃줈 吏?뺥븳 ?붾젆?좊━??`.claude/skills/`???먮룞 濡쒕뱶
+저장 위치:
+- **사용자 전역**: `~/.claude/skills/skill-name/`
+- **프로젝트 전용**: `.claude/skills/skill-name/`
+- `--add-dir` 플래그로 지정한 디렉토리의 `.claude/skills/`도 자동 로드
 
-### Frontmatter ?꾨뱶 ?꾩껜 李몄“
+### Frontmatter 필드 전체 참조
 
 ```yaml
 ---
-name: kotlin-reviewer          # ?꾩닔: 64???댄븯, ?뚮Ц?먃룹닽?먃룻븯?댄뵂留?description: |                 # ?꾩닔: 1024???댄븯, ?먮룞 ?몄텧 ?먮떒???듭떖
-  Kotlin 肄붾뱶瑜?由щ럭?쒕떎. PR 由щ럭, 肄붾뱶 ?덉쭏 寃??
-  ?꾪궎?띿쿂 ?⑦꽩 ?뺤씤 ???ъ슜. "由щ럭", "肄붾뱶 寃??,
-  "PR ?뺤씤" ?깆쓽 ?ㅼ썙?쒖뿉 諛섏쓳.
-allowed-tools: Read, Grep, Glob  # ?듭뀡: ?덉슜 ?꾧뎄 ?쒗븳
-context: main                    # ?듭뀡: main(湲곕낯) | fork
-agent: code-reviewer             # ?듭뀡: context:fork ??二쇱엯???먯씠?꾪듃
-disable-model-invocation: true   # ?듭뀡: true硫??ъ슜?먮쭔 /skill-name?쇰줈 ?몄텧 媛??user-invocable: false            # ?듭뀡: false硫?Claude留??먮룞 濡쒕뱶, /紐낅졊???놁쓬
+name: kotlin-reviewer          # 필수: 64자 이하, 소문자·숫자·하이픈만
+description: |                 # 필수: 1024자 이하, 자동 호출 판단의 핵심
+  Kotlin 코드를 리뷰한다. PR 리뷰, 코드 품질 검사,
+  아키텍처 패턴 확인 시 사용. "리뷰", "코드 검사",
+  "PR 확인" 등의 키워드에 반응.
+allowed-tools: Read, Grep, Glob  # 옵션: 허용 도구 제한
+context: main                    # 옵션: main(기본) | fork
+agent: code-reviewer             # 옵션: context:fork 시 주입할 에이전트
+disable-model-invocation: true   # 옵션: true면 사용자만 /skill-name으로 호출 가능
+user-invocable: false            # 옵션: false면 Claude만 자동 로드, /명령어 없음
 ---
 ```
 
-| ?꾨뱶 | ?꾩닔 | ?ㅻ챸 |
+| 필드 | 필수 | 설명 |
 |------|------|------|
-| `name` | ??| ?щ옒??而ㅻ㎤???대쫫????(`/name`) |
-| `description` | ??| Claude???먮룞 ?몄텧 ?먮떒 湲곗?. **"when to use"瑜??ш린??紐⑤몢 ?쒖닠** |
-| `allowed-tools` | ??| ???ㅽ궗 ?ㅽ뻾 ???덉슜???꾧뎄 紐⑸줉 |
-| `context` | ??| `main`(湲곕낯) ?먮뒗 `fork`(寃⑸━ SubAgent?먯꽌 ?ㅽ뻾) |
-| `agent` | ??| `context: fork` ??二쇱엯???먯씠?꾪듃 ???|
-| `disable-model-invocation` | ??| `true`: ?ъ슜?먮쭔 ?몄텧 媛??(諛고룷, 而ㅻ컠 ??遺?묒슜 ?덈뒗 ?≪뀡???ъ슜) |
-| `user-invocable` | ??| `false`: Claude留??먮룞 濡쒕뱶, `/紐낅졊?? ?놁쓬 (諛곌꼍 吏??二쇱엯?? |
+| `name` | ✅ | 슬래시 커맨드 이름이 됨 (`/name`) |
+| `description` | ✅ | Claude의 자동 호출 판단 기준. **"when to use"를 여기에 모두 서술** |
+| `allowed-tools` | ❌ | 이 스킬 실행 시 허용할 도구 목록 |
+| `context` | ❌ | `main`(기본) 또는 `fork`(격리 SubAgent에서 실행) |
+| `agent` | ❌ | `context: fork` 시 주입할 에이전트 타입 |
+| `disable-model-invocation` | ❌ | `true`: 사용자만 호출 가능 (배포, 커밋 등 부작용 있는 액션에 사용) |
+| `user-invocable` | ❌ | `false`: Claude만 자동 로드, `/명령어` 없음 (배경 지식 주입용) |
 
-> ?뮕 **description ?묒꽦 ?먯튃**: `description`? ?쒖뒪???꾨＼?꾪듃??吏곸젒 二쇱엯?쒕떎. 3?몄묶?쇰줈 ?묒꽦?섍퀬, "what the skill does"? "when to use it"??紐⑤몢 ?ы븿?댁빞 ?쒕떎. Body??"When to Use" ?뱀뀡???ｌ뼱??Body???ㅽ궗 ?좏깮 ?꾩뿉 濡쒕뱶?섎?濡??섎?媛 ?녿떎.
+> 💡 **description 작성 원칙**: `description`은 시스템 프롬프트에 직접 주입된다. 3인칭으로 작성하고, "what the skill does"와 "when to use it"을 모두 포함해야 한다. Body에 "When to Use" 섹션을 넣어도 Body는 스킬 선택 후에 로드되므로 의미가 없다.
 >
-> ?ㅽ뿕???곕Ⅴ硫?description 理쒖쟻?붾쭔?쇰줈 ?먮룞 ?쒖꽦?붿쑉??20% ??50%濡? ?덉떆 異붽? ??90%源뚯? ?μ긽?쒕떎.
+> 실험에 따르면 description 최적화만으로 자동 활성화율이 20% → 50%로, 예시 추가 시 90%까지 향상된다.
 
-### ?몄텧 諛⑹떇: ?먮룞 vs ?섎룞
+### 호출 방식: 자동 vs 수동
 
 ```mermaid
 graph LR
-    A[?ㅽ궗 ?뺤쓽] --> B{?몄텧 諛⑹떇}
-    B -->|"湲곕낯媛?n(?먮룞+?섎룞 紐⑤몢)"| C["Claude媛 ?먮룞 媛먯?\n+ /skill-name 吏곸젒 ?몄텧"]
-    B -->|"disable-model-invocation: true"| D["/skill-name ?쇰줈留??몄텧\n(遺?묒슜 ?덈뒗 ?≪뀡??"]
-    B -->|"user-invocable: false"| E["Claude媛 ?먮룞 媛먯?留?n(?щ옒??而ㅻ㎤???놁쓬)"]
+    A[스킬 정의] --> B{호출 방식}
+    B -->|"기본값\n(자동+수동 모두)"| C["Claude가 자동 감지\n+ /skill-name 직접 호출"]
+    B -->|"disable-model-invocation: true"| D["/skill-name 으로만 호출\n(부작용 있는 액션용)"]
+    B -->|"user-invocable: false"| E["Claude가 자동 감지만\n(슬래시 커맨드 없음)"]
 ```
 
-**?먮룞 ?몄텧 vs ?섎룞 ?몄텧 ?좏깮 湲곗?:**
+**자동 호출 vs 수동 호출 선택 기준:**
 
-| ?곹솴 | ?ㅼ젙 | ?덉떆 |
+| 상황 | 설정 | 예시 |
 |------|------|------|
-| ?먯쑀濡?쾶 ?몄젣???곕뒗 吏??| 湲곕낯媛?| `kotlin-conventions`, `architecture-guide` |
-| 遺?묒슜???덈뒗 ?≪뀡 (Claude媛 ?쇱옄 ?ㅽ뻾?섎㈃ ???? | `disable-model-invocation: true` | `/commit`, `/deploy`, `/send-slack` |
-| 諛곌꼍 吏?앹쑝濡쒕쭔 ??寃?(紐낅졊?대줈 ?섎? ?놁쓬) | `user-invocable: false` | `legacy-system-context`, `team-glossary` |
+| 자유롭게 언제든 쓰는 지식 | 기본값 | `kotlin-conventions`, `architecture-guide` |
+| 부작용이 있는 액션 (Claude가 혼자 실행하면 안 됨) | `disable-model-invocation: true` | `/commit`, `/deploy`, `/send-slack` |
+| 배경 지식으로만 쓸 것 (명령어로 의미 없음) | `user-invocable: false` | `legacy-system-context`, `team-glossary` |
 
-### Progressive Disclosure ?⑦꽩
+### Progressive Disclosure 패턴
 
-Skills???듭떖 ?ㅺ퀎 ?먯튃? **Progressive Disclosure(?먯쭊??怨듦컻)**?? 泥섏쓬??理쒖냼?쒖쓽 ?뺣낫留??몄텧?섍퀬, ?꾩슂?댁쭏 ?????먯꽭???댁슜??濡쒕뱶?쒕떎. 而⑦뀓?ㅽ듃 ?덈룄?곕뒗 怨듭쑀 ?먯썝?대?濡? ?꾩슂?섏? ?딆? ?댁슜??誘몃━ 濡쒕뱶?섏? ?딅뒗??
+Skills의 핵심 설계 원칙은 **Progressive Disclosure(점진적 공개)**다. 처음엔 최소한의 정보만 노출하고, 필요해질 때 더 자세한 내용을 로드한다. 컨텍스트 윈도우는 공유 자원이므로, 필요하지 않은 내용을 미리 로드하지 않는다.
 
 ```
-SKILL.md 500以??댄븯 沅뚯옣 (湲곕낯 吏移⑤쭔)
-    ???꾩슂 ??Claude媛 Read濡??묎렐
-references/api-spec.md     ??API 紐낆꽭 ?꾩껜
-references/patterns.md     ???몃? ?⑦꽩 媛?대뱶
-    ???ㅽ뻾 ?쒖뿉留?scripts/extract.py         ???ㅽ겕由쏀듃 異쒕젰留?而⑦뀓?ㅽ듃 ?뚮퉬
+SKILL.md 500줄 이하 권장 (기본 지침만)
+    ↓ 필요 시 Claude가 Read로 접근
+references/api-spec.md     ← API 명세 전체
+references/patterns.md     ← 세부 패턴 가이드
+    ↓ 실행 시에만
+scripts/extract.py         ← 스크립트 출력만 컨텍스트 소비
 ```
 
-??援ъ“ ?뺣텇??諛⑸???API 臾몄꽌, ?洹쒕え ?덉떆, ?곗씠?곗뀑??踰덈뱾?대룄 **?ㅼ젣濡??묎렐?섍린 ?꾧퉴吏 而⑦뀓?ㅽ듃 ?좏겙???뚮퉬?섏? ?딅뒗??**
+이 구조 덕분에 방대한 API 문서, 대규모 예시, 데이터셋을 번들해도 **실제로 접근되기 전까지 컨텍스트 토큰을 소비하지 않는다.**
 
-### Skill ?ㅺ퀎 泥좏븰
+### Skill 설계 철학
 
-#### 怨듭떇 臾몄꽌媛 留먰븯??Skill??蹂몄쭏
+#### 공식 문서가 말하는 Skill의 본질
 
-Anthropic 怨듭떇 釉붾줈洹?Skills Explained, 2025.11)??Skills???⑸룄瑜?紐낇솗???뺤쓽?쒕떎.
+Anthropic 공식 블로그(Skills Explained, 2025.11)는 Skills의 용도를 명확히 정의한다.
 
-> "**Use Skills when**: You have procedures or expertise that you'll need repeatedly. Skills are proactive?봀laude knows when to apply them?봞nd persistent across conversations."
-> ??Anthropic 怨듭떇 釉붾줈洹?
-利?Skill???듭떖 媛移섎뒗 **諛섎났 ?ъ슜**怨?**?먮룞 ?곸슜**?대떎. ??踰덈쭔 ??吏移⑥? ?꾨＼?꾪듃濡?異⑸텇?섍퀬, ?щ윭 ??붿뿉 嫄몄퀜 諛섎났???덉감??吏?앹씠 Skill???곹빀????곸씠??
+> "**Use Skills when**: You have procedures or expertise that you'll need repeatedly. Skills are proactive—Claude knows when to apply them—and persistent across conversations."
+> — Anthropic 공식 블로그
 
-Anthropic best practices 臾몄꽌??Skill 媛쒕컻??異쒕컻?먯쑝濡??ㅼ쓬 諛⑸쾿??沅뚯옣?쒕떎.
+즉 Skill의 핵심 가치는 **반복 사용**과 **자동 적용**이다. 한 번만 쓸 지침은 프롬프트로 충분하고, 여러 대화에 걸쳐 반복될 절차나 지식이 Skill의 적합한 대상이다.
 
-> "Complete a task without a Skill first. As you work, you'll naturally provide context and procedural knowledge. Notice what information you repeatedly provide ??that's your Skill."
-> ??Anthropic Skill Authoring Best Practices
+Anthropic best practices 문서는 Skill 개발의 출발점으로 다음 방법을 권장한다.
 
-?대뒗 ?ㅼ젣濡?諛섎났?섎뒗 ?⑦꽩??癒쇱? 諛쒓껄????Skill濡?異붿텧?섎씪???묎렐?대떎.
+> "Complete a task without a Skill first. As you work, you'll naturally provide context and procedural knowledge. Notice what information you repeatedly provide — that's your Skill."
+> — Anthropic Skill Authoring Best Practices
 
-#### Skills????媛吏 肄섑뀗痢??좏삎
+이는 실제로 반복되는 패턴을 먼저 발견한 뒤 Skill로 추출하라는 접근이다.
 
-怨듭떇 臾몄꽌??Skill 肄섑뀗痢좊? ???좏삎?쇰줈 援щ텇?쒕떎.
+#### Skills의 두 가지 콘텐츠 유형
 
-| ?좏삎 | ?ㅻ챸 | ?덉떆 |
+공식 문서는 Skill 콘텐츠를 두 유형으로 구분한다.
+
+| 유형 | 설명 | 예시 |
 |------|------|------|
-| **Reference content** | Claude媛 ?꾩옱 ?묒뾽???곸슜??吏?씲룹빻踰ㅼ뀡쨌?꾨찓??洹쒖튃 | 肄붾뵫 而⑤깽?? ?꾪궎?띿쿂 ?⑦꽩, ? ?⑹뼱吏?|
-| **Workflow instructions** | Claude媛 ?곕? ?④퀎蹂??덉감 | PR 由щ럭 泥댄겕由ъ뒪?? 諛고룷 ?덉감, 踰꾧렇 遺꾩꽍 ?꾨줈?좎퐳 |
+| **Reference content** | Claude가 현재 작업에 적용할 지식·컨벤션·도메인 규칙 | 코딩 컨벤션, 아키텍처 패턴, 팀 용어집 |
+| **Workflow instructions** | Claude가 따를 단계별 절차 | PR 리뷰 체크리스트, 배포 절차, 버그 분석 프로토콜 |
 
-???좏삎 紐⑤몢 ?좏슚?섎ŉ, ?섎굹??Skill???섏쓣 ?④퍡 ?ы븿???섎룄 ?덈떎.
+두 유형 모두 유효하며, 하나의 Skill이 둘을 함께 포함할 수도 있다.
 
-#### 援ъ껜???덉감? ?덉떆媛 ?쇨??깆쓣 ?믪씤??(怨듭떇 沅뚯옣)
+#### 구체적 절차와 예시가 일관성을 높인다 (공식 권장)
 
-Anthropic best practices??異쒕젰 ?덉쭏???덉떆???섏〈?섎뒗 Skill??寃쎌슦 **?낅젰/異쒕젰 ???덉떆)** ??紐낆떆?곸쑝濡??쒓났?섎룄濡?沅뚯옣?쒕떎. ?대뒗 Claude媛 留ㅻ쾲 ?ㅻⅨ ?뺤떇?쇰줈 ?묐떟?섎뒗 寃껋쓣 諛⑹??쒕떎.
+Anthropic best practices는 출력 품질이 예시에 의존하는 Skill의 경우 **입력/출력 쌍(예시)** 을 명시적으로 제공하도록 권장한다. 이는 Claude가 매번 다른 형식으로 응답하는 것을 방지한다.
 
 ```yaml
 ---
 name: commit-message
 description: |
-  而ㅻ컠 硫붿떆吏瑜?而⑤깽?섏뿉 留욊쾶 ?묒꽦?쒕떎.
-  "而ㅻ컠", "commit message" ?묒꽦 ???ъ슜.
+  커밋 메시지를 컨벤션에 맞게 작성한다.
+  "커밋", "commit message" 작성 시 사용.
 ---
 
 ## Commit Message Format
 
 **Example 1:**
-Input: JWT 湲곕컲 ?ъ슜???몄쬆 異붽?
+Input: JWT 기반 사용자 인증 추가
 Output:
 feat(auth): implement JWT-based authentication
 Add login endpoint and token validation middleware
 
 **Example 2:**
-Input: 由ы룷?몄뿉???좎쭨媛 ?섎せ ?쒖떆?섎뒗 踰꾧렇 ?섏젙
+Input: 리포트에서 날짜가 잘못 표시되는 버그 수정
 Output:
 fix(reports): correct date formatting in timezone conversion
 Use UTC timestamps consistently across report generation
@@ -510,185 +527,187 @@ Use UTC timestamps consistently across report generation
 
 ---
 
-> ?뮕 **?몄쭛??沅뚯옣 愿??* ???꾨옒 ?댁슜? 怨듭떇 臾몄꽌?먯꽌 吏곸젒 ?쒖떆?섎뒗 ?꾨젅?꾩썙?щ뒗 ?꾨땲吏留? Skill ?ㅺ퀎 寃쏀뿕?먯꽌 ?꾩텧???ㅼ슜??愿?먯쑝濡?李멸퀬??留뚰븯??
+> 💡 **편집자 권장 관점** — 아래 내용은 공식 문서에서 직접 제시하는 프레임워크는 아니지만, Skill 설계 경험에서 도출된 실용적 관점으로 참고할 만하다.
 
-#### [沅뚯옣 愿?? 諛섎났 ?꾨＼?꾪듃瑜?Skill濡?留뚮뱾 ?뚯쓽 ?듭떖 李⑥씠
+#### [권장 관점] 반복 프롬프트를 Skill로 만들 때의 핵심 차이
 
-諛섎났 ?꾨＼?꾪듃瑜?Skill濡?留뚮뱶??寃껋? 醫뗭? 異쒕컻?먯씠吏留? "?먯＜ ?곕뒗 ?꾨＼?꾪듃 紐⑥쓬"??洹몄튂硫??ы쁽?깆씠 ??떎. Claude???뺣쪧 紐⑤뜽?닿린 ?뚮Ц???ш퀬 寃쎈줈瑜?紐낆떆?섏? ?딆쑝硫?留ㅻ쾲 寃곌낵媛 ?щ씪吏????덈떎.
+반복 프롬프트를 Skill로 만드는 것은 좋은 출발점이지만, "자주 쓰는 프롬프트 모음"에 그치면 재현성이 낮다. Claude는 확률 모델이기 때문에 사고 경로를 명시하지 않으면 매번 결과가 달라질 수 있다.
 
 ```yaml
-# ?⑥닚 ?붿껌??(?ы쁽????쓬)
+# 단순 요청형 (재현성 낮음)
 ---
 name: pr-review
-description: PR??瑗쇨세??由щ럭?쒕떎.
+description: PR을 꼼꼼히 리뷰한다.
 ---
 Review this PR carefully.
 Check architecture, coroutines, and style.
 ```
 
 ```yaml
-# ?덉감 紐낆떆??(?ы쁽???믪쓬)
+# 절차 명시형 (재현성 높음)
 ---
 name: pr-review-protocol
 description: |
-  PR 肄붾뱶 由щ럭瑜??④퀎蹂??꾨줈?좎퐳濡??섑뻾?쒕떎.
-  "PR 由щ럭", "肄붾뱶 由щ럭", "diff ?뺤씤" ???ъ슜.
+  PR 코드 리뷰를 단계별 프로토콜로 수행한다.
+  "PR 리뷰", "코드 리뷰", "diff 확인" 시 사용.
 ---
 
 ## Input Required
-- 由щ럭 ???PR diff ?먮뒗 ?뚯씪 紐⑸줉
+- 리뷰 대상 PR diff 또는 파일 목록
 
-## Review Steps (?쒖꽌 怨좎젙)
-1. Module Boundary Check ???덉씠??寃쎄퀎 移⑤쾾 ?щ?
-2. Threading Safety ??dispatcher, scope, blocking ?꾪뿕
-3. Error Handling ???덉쇅 ?꾨씫, 移⑤У catch
-4. Test Coverage ???듭떖 寃쎈줈 而ㅻ쾭 ?щ?
-5. Regression Risk ??湲곗〈 湲곕뒫 ?곹뼢 踰붿쐞
+## Review Steps (순서 고정)
+1. Module Boundary Check — 레이어 경계 침범 여부
+2. Threading Safety — dispatcher, scope, blocking 위험
+3. Error Handling — 예외 누락, 침묵 catch
+4. Test Coverage — 핵심 경로 커버 여부
+5. Regression Risk — 기존 기능 영향 범위
 
 ## Output Format
-媛???ぉ: 洹쇨굅 / ?꾪뿕??(Low쨌Medium쨌High) / 援ъ껜???섏젙??```
+각 항목: 근거 / 위험도 (Low·Medium·High) / 구체적 수정안
+```
 
-#### [沅뚯옣 愿?? CLAUDE.md, Rules, Skills????븷 援щ텇
+#### [권장 관점] CLAUDE.md, Rules, Skills의 역할 구분
 
-| 援ъ꽦 ?붿냼 | ??븷 | ?깃꺽 |
+| 구성 요소 | 역할 | 성격 |
 |-----------|------|------|
-| `CLAUDE.md` / Rules | ?덈? ?먯튃, 湲덉? ?ы빆, ?꾨줈?앺듃 留λ씫 | ?좎뼵??|
-| Skills | 諛섎났 ?묒뾽???ㅽ뻾 ?덉감, ?꾨찓??吏??| ?덉감?겶룹??앹쟻 |
-| SubAgent | 寃⑸━??而⑦뀓?ㅽ듃?먯꽌 Skills瑜??곸슜?섎뒗 ?ㅽ뻾 ?⑥쐞 | ?꾩엫 |
+| `CLAUDE.md` / Rules | 절대 원칙, 금지 사항, 프로젝트 맥락 | 선언적 |
+| Skills | 반복 작업의 실행 절차, 도메인 지식 | 절차적·지식적 |
+| SubAgent | 격리된 컨텍스트에서 Skills를 적용하는 실행 단위 | 위임 |
 
-??援щ텇??紐낇솗?댁?硫??대뼡 ?댁슜???대뵒???먯뼱???좎? 寃곗젙???ъ썙吏꾨떎. Rules媛 "?덉씠??媛?吏곸젒 李몄“ 湲덉?"?쇰뒗 ?먯튃?대씪硫? Skill? "肄붾뱶 由щ럭 ??1?④퀎濡??덉씠??寃쎄퀎 移⑤쾾 ?щ?瑜??뺤씤?섍퀬 ?꾨컲 ???ш컖?꾩? ?섏젙?덉쓣 ?쒖떆?쒕떎"??吏묓뻾 ?덉감??
+이 구분이 명확해지면 어떤 내용을 어디에 두어야 할지 결정이 쉬워진다. Rules가 "레이어 간 직접 참조 금지"라는 원칙이라면, Skill은 "코드 리뷰 시 1단계로 레이어 경계 침범 여부를 확인하고 위반 시 심각도와 수정안을 제시한다"는 집행 절차다.
 
 ---
 
-## ?ㅼ슜???쒖슜 ?⑦꽩怨?踰좎뒪???꾨옓?곗뒪
+## 실용적 활용 패턴과 베스트 프랙티스
 
-### 而ㅻ??덊떚?먯꽌 寃利앸맂 媛???④낵?곸씤 ?⑦꽩
+### 커뮤니티에서 검증된 가장 효과적인 패턴
 
-Claude Code ?듭떖 ?붿??덉뼱 **Adam Wolf**??議곗뼵???곕Ⅴ硫? SubAgent??**"?뺣낫瑜??먯깋?섍퀬 吏㏃? ?붿빟??硫붿씤 ??붿뿉 諛섑솚????媛?????묐룞?쒕떎."** 利? SubAgent?먭쾶 援ы쁽??留↔린??寃껊낫??而⑦뀓?ㅽ듃 ?섏쭛쨌遺꾩꽍???꾩엫?섍퀬 ?ㅼ젣 ?ㅽ뻾? 硫붿씤 ?먯씠?꾪듃媛 ?대떦?섎뒗 **Explore ??Plan ??Execute ?⑦꽩**??而ㅻ??덊떚 ?⑹쓽 ?ы빆?대떎.
+Claude Code 핵심 엔지니어 **Adam Wolf**의 조언에 따르면, SubAgent는 **"정보를 탐색하고 짧은 요약을 메인 대화에 반환할 때 가장 잘 작동한다."** 즉, SubAgent에게 구현을 맡기는 것보다 컨텍스트 수집·분석을 위임하고 실제 실행은 메인 에이전트가 담당하는 **Explore → Plan → Execute 패턴**이 커뮤니티 합의 사항이다.
 
 ```mermaid
 flowchart LR
-    subgraph E["Explore (Haiku - ?鍮꾩슜)"]
-        E1[肄붾뱶踰좎씠???ㅼ틪]
-        E2[?⑦꽩쨌?섏〈??遺꾩꽍]
+    subgraph E["Explore (Haiku - 저비용)"]
+        E1[코드베이스 스캔]
+        E2[패턴·의존성 분석]
     end
     subgraph P["Plan (Sonnet)"]
-        P1[援ы쁽 怨꾪쉷 ?섎┰]
-        P2[由ъ뒪??遺꾩꽍]
+        P1[구현 계획 수립]
+        P2[리스크 분석]
     end
     subgraph X["Execute (Sonnet/Opus)"]
-        X1[?ㅼ젣 肄붾뱶 ?묒꽦]
-        X2[?뚯뒪???ㅽ뻾]
+        X1[실제 코드 작성]
+        X2[테스트 실행]
     end
-    E -->|"吏㏃? ?붿빟 諛섑솚"| P
-    P -->|"怨꾪쉷 臾몄꽌 諛섑솚"| X
+    E -->|"짧은 요약 반환"| P
+    P -->|"계획 문서 반환"| X
 ```
 
-**PubNub ?щ?**媛 ??쒖쟻?대떎. PubNub ?? ?좊뱶???꾨＼?꾪듃?먯꽌 3?④퀎 SubAgent ?뚯씠?꾨씪??`pm-spec ??architect-review ??implementer-tester`)?쇰줈 留덉씠洹몃젅?댁뀡?덈떎. PM怨?Architect???쎄린 以묒떖 沅뚰븳留? Implementer??Edit/Write/Bash瑜?遺?ы뻽?? SubagentStop Hook?쇰줈 ?④퀎 媛??꾪솚???먮룞?뷀븯怨? 媛??몃뱶?ㅽ봽?먯꽌 ?щ엺???뱀씤??諛쏅뒗 human-in-the-loop ?⑦꽩???곸슜?덈떎.
+**PubNub 사례**가 대표적이다. PubNub 팀은 애드혹 프롬프트에서 3단계 SubAgent 파이프라인(`pm-spec → architect-review → implementer-tester`)으로 마이그레이션했다. PM과 Architect는 읽기 중심 권한만, Implementer는 Edit/Write/Bash를 부여했다. SubagentStop Hook으로 단계 간 전환을 자동화하고, 각 핸드오프에서 사람의 승인을 받는 human-in-the-loop 패턴을 적용했다.
 
 ```mermaid
 flowchart TD
-    A["pm-spec\n(?쎄린 ?꾩슜)"] -->|?붽뎄?ы빆 臾몄꽌| HG1{Human Gate}
-    HG1 -->|?뱀씤| B["architect-review\n(?쎄린 ?꾩슜)"]
-    B -->|?ㅺ퀎 臾몄꽌| HG2{Human Gate}
-    HG2 -->|?뱀씤| C["implementer-tester\n(Edit + Write + Bash)"]
-    C --> D{?덉쭏 寃뚯씠??
-    D -->|?듦낵| E[???꾨즺]
-    D -->|?ㅽ뙣| A
+    A["pm-spec\n(읽기 전용)"] -->|요구사항 문서| HG1{Human Gate}
+    HG1 -->|승인| B["architect-review\n(읽기 전용)"]
+    B -->|설계 문서| HG2{Human Gate}
+    HG2 -->|승인| C["implementer-tester\n(Edit + Write + Bash)"]
+    C --> D{품질 게이트}
+    D -->|통과| E[✅ 완료]
+    D -->|실패| A
 ```
 
-**zhsama??Spec Workflow System**? ???뺢탳???щ?濡? `spec-analyst ??spec-architect ??spec-planner ??spec-developer ??spec-tester ??spec-reviewer ??spec-validator`??7?④퀎 ?뚯씠?꾨씪?몄뿉 ?덉쭏 寃뚯씠?몃? ?쎌엯???ㅽ뙣 ???댁쟾 ?④퀎濡?猷⑦봽諛깊븯??援ъ“瑜?援ы쁽?덈떎.
+**zhsama의 Spec Workflow System**은 더 정교한 사례로, `spec-analyst → spec-architect → spec-planner → spec-developer → spec-tester → spec-reviewer → spec-validator`의 7단계 파이프라인에 품질 게이트를 삽입해 실패 시 이전 단계로 루프백하는 구조를 구현했다.
 
-### ?먮룞 ?꾩엫???쒖꽦?뷀븯???듭떖 湲곕쾿
+### 자동 위임을 활성화하는 핵심 기법
 
-HackerNews? 釉붾줈洹몄뿉??諛섎났?곸쑝濡?吏?곷릺??臾몄젣媛 ?덈떎. **SubAgent媛 ?뺤쓽?섏뼱 ?덉뼱??Claude媛 吏곸젒 ?묒뾽???섑뻾?섍퀬 SubAgent瑜??몄텧?섏? ?딅뒗 寃쎌슦媛 鍮덈쾲?섎떎**??寃껋씠??
+HackerNews와 블로그에서 반복적으로 지적되는 문제가 있다. **SubAgent가 정의되어 있어도 Claude가 직접 작업을 수행하고 SubAgent를 호출하지 않는 경우가 빈번하다**는 것이다.
 
-| 諛⑸쾿 | ?덉떆 |
+| 방법 | 예시 |
 |------|------|
-| `description` ?꾨뱶??`"Use proactively"` 臾멸뎄 ?ы븿 | `"Use proactively after code changes"` |
-| CLAUDE.md??紐낆떆???꾩엫 吏移?異붽? | `"?곗씠?곕쿋?댁뒪 愿???묒뾽?먮뒗 database-admin ?먯씠?꾪듃瑜??ъ슜?섎씪"` |
-| ?꾨＼?꾪듃?먯꽌 SubAgent瑜?紐낆떆?곸쑝濡??붿껌 | `"use the code-reviewer subagent to check the auth module"` |
+| `description` 필드에 `"Use proactively"` 문구 포함 | `"Use proactively after code changes"` |
+| CLAUDE.md에 명시적 위임 지침 추가 | `"데이터베이스 관련 작업에는 database-admin 에이전트를 사용하라"` |
+| 프롬프트에서 SubAgent를 명시적으로 요청 | `"use the code-reviewer subagent to check the auth module"` |
 
-### 異붿쿇 ?ъ슜 ?쒕굹由ъ삤
+### 추천 사용 시나리오
 
-SubAgent媛 ?뱁엳 ?④낵?곸씤 ?곹솴? ?ㅼ쓬怨?媛숇떎.
+SubAgent가 특히 효과적인 상황은 다음과 같다.
 
-| ?쒕굹由ъ삤 | ?ㅻ챸 |
+| 시나리오 | 설명 |
 |----------|------|
-| **?洹쒕え 肄붾뱶踰좎씠???먯깋** | Explore SubAgent媛 Haiku 紐⑤뜽濡?鍮좊Ⅴ怨???댄븯寃??섏떗 媛??뚯씪???ㅼ틪?????붿빟留?諛섑솚 |
-| **肄붾뱶 由щ럭** | 蹂꾨룄 而⑦뀓?ㅽ듃?먯꽌 蹂댁븞쨌?ㅽ??셋룻뀒?ㅽ듃 而ㅻ쾭由ъ?瑜??숈떆 蹂묐젹 寃??|
-| **?붾쾭源?* | 3媛?SubAgent濡?踰꾧렇 異붿쟻쨌媛??寃利씲룸????쒖떆瑜?蹂묐젹 ?섑뻾 |
-| **臾몄꽌쨌API 遺꾩꽍** | ?몃? 臾몄꽌瑜?????쎌뼱 ?붿빟蹂몃쭔 硫붿씤 ?먯씠?꾪듃???꾨떖 |
-| **TDD ?뚰겕?뚮줈??* | ?뚯뒪???묒꽦쨌?ㅽ뻾쨌寃곌낵 遺꾩꽍??寃⑸━??而⑦뀓?ㅽ듃?먯꽌 ?섑뻾 |
+| **대규모 코드베이스 탐색** | Explore SubAgent가 Haiku 모델로 빠르고 저렴하게 수십 개 파일을 스캔한 뒤 요약만 반환 |
+| **코드 리뷰** | 별도 컨텍스트에서 보안·스타일·테스트 커버리지를 동시 병렬 검사 |
+| **디버깅** | 3개 SubAgent로 버그 추적·가정 검증·대안 제시를 병렬 수행 |
+| **문서·API 분석** | 외부 문서를 대량 읽어 요약본만 메인 에이전트에 전달 |
+| **TDD 워크플로우** | 테스트 작성·실행·결과 분석을 격리된 컨텍스트에서 수행 |
 
-諛섎㈃ SubAgent蹂대떎 **Skills媛 ???곹빀??寃쎌슦**?? 硫붿씤 ???而⑦뀓?ㅽ듃?먯꽌 ?ъ궗??媛?ν븳 ?꾨＼?꾪듃媛 ?꾩슂????寃⑸━媛 遺덊븘?뷀븷 ????
+반면 SubAgent보다 **Skills가 더 적합한 경우**는, 메인 대화 컨텍스트에서 재사용 가능한 프롬프트가 필요할 때(격리가 불필요할 때)다.
 
 ---
 
-## ?쒓퀎?? 鍮꾩슜, 二쇱쓽?ы빆
+## 한계점, 비용, 주의사항
 
-### ?좏겙 鍮꾩슜??湲됯꺽??利앷?
+### 토큰 비용의 급격한 증가
 
-SubAgent ?쒖슜 ??媛?????꾩떎???쒖빟? ?좏겙 ?뚮퉬?? GitHub 媛?대뱶(rvalen1123)???곕Ⅴ硫? **3媛쒖쓽 ?쒖꽦 SubAgent媛 ?덈뒗 ?몄뀡? ?쇰컲?곸쑝濡?~3-4諛곗쓽 ?좏겙???뚮퉬**?쒕떎. 媛?SubAgent媛 ?낅┰ 而⑦뀓?ㅽ듃 ?덈룄?곕? ?좎??섍린 ?뚮Ц?대떎.
+SubAgent 활용 시 가장 큰 현실적 제약은 토큰 소비다. GitHub 가이드(rvalen1123)에 따르면, **3개의 활성 SubAgent가 있는 세션은 일반적으로 ~3-4배의 토큰을 소비**한다. 각 SubAgent가 독립 컨텍스트 윈도우를 유지하기 때문이다.
 
-| ?곹솴 | ?좏겙 ?뚮퉬 諛곗쑉 |
+| 상황 | 토큰 소비 배율 |
 |------|---------------|
-| ?쇰컲 ?몄뀡 | 1x |
-| SubAgent 1媛??쒖꽦 | ~1.5x |
-| SubAgent 3媛??쒖꽦 | **~3-4x** |
-| Opus 紐⑤뜽 4媛?蹂묐젹 | 二쇨컙 24?쒓컙 ?쒕룄 ??**?ㅼ쭏 6?쒓컙** |
+| 일반 세션 | 1x |
+| SubAgent 1개 활성 | ~1.5x |
+| SubAgent 3개 활성 | **~3-4x** |
+| Opus 모델 4개 병렬 | 주간 24시간 한도 → **실질 6시간** |
 
-Opus 紐⑤뜽 湲곗? 二쇨컙 24?쒓컙 ?쒗븳???덈뒗 ?곹솴?먯꽌 4媛?蹂묐젹 ?먯씠?꾪듃瑜??ㅽ뻾?섎㈃ **?ㅼ쭏 ?묒뾽 ?쒓컙? 6?쒓컙?쇰줈 媛먯냼**?쒕떎(GitHub ?댁뒋 #4807). ?ъ슜?먮뱾? SubAgent媛 硫붿씤 而⑦뀓?ㅽ듃?먯꽌 3K ?좏겙?대㈃ ???묒뾽??**160K ?좏겙???뚮퉬**?섎뒗 ?щ???蹂닿퀬?덈떎.
+Opus 모델 기준 주간 24시간 제한이 있는 상황에서 4개 병렬 에이전트를 실행하면 **실질 작업 시간은 6시간으로 감소**한다(GitHub 이슈 #4807). 사용자들은 SubAgent가 메인 컨텍스트에서 3K 토큰이면 될 작업에 **160K 토큰을 소비**하는 사례도 보고했다.
 
-鍮꾩슜 ?쒖뼱 ?꾨왂?쇰줈???먯깋 ?묒뾽??**Haiku 紐⑤뜽???곴레 ?쒖슜**?섍퀬, 援ы쁽 ?묒뾽?먮쭔 Sonnet/Opus瑜?諛곗젙?섎뒗 紐⑤뜽 怨꾩링?붽? ?④낵?곸씠?? 媛?SubAgent??`model` ?꾨뱶瑜??곸젅???ㅼ젙?섎㈃ ?숈씪???묒뾽???⑥뵮 ??댄븯寃?泥섎━?????덈떎.
+비용 제어 전략으로는 탐색 작업에 **Haiku 모델을 적극 활용**하고, 구현 작업에만 Sonnet/Opus를 배정하는 모델 계층화가 효과적이다. 각 SubAgent의 `model` 필드를 적절히 설정하면 동일한 작업을 훨씬 저렴하게 처리할 수 있다.
 
-### ?꾪궎?띿쿂???쒗븳?ы빆
+### 아키텍처적 제한사항
 
-| ?쒗븳 | ?댁슜 | ?고쉶 諛⑸쾿 |
+| 제한 | 내용 | 우회 방법 |
 |------|------|-----------|
-| **以묒꺽 遺덇?** | SubAgent???ㅻⅨ SubAgent瑜??앹꽦?????녿떎 | 硫붿씤 ??붿뿉???쒖감?곸쑝濡?泥댁씠??|
-| **而⑦뀓?ㅽ듃 ?⑥젅 (Context Amnesia)** | 媛?SubAgent??鍮??щ젅?댄듃?먯꽌 ?쒖옉 | `prompt` ?꾨뱶濡?異⑸텇??而⑦뀓?ㅽ듃 ?꾨떖 |
-| **CLAUDE.md 誘몄쟾??* | ?꾨줈?앺듃 洹쒖튃???먮룞?쇰줈 SubAgent???꾨떖?섏? ?딆쓣 ???덈떎 | ?쒖뒪???꾨＼?꾪듃 吏곸젒 ?ы븿 ?먮뒗 `skills` ?쒖슜 |
-| **?⑹꽦 臾몄젣 (Synthesis Problem)** | ?щ윭 SubAgent 寃곌낵瑜??듯빀?섎뒗 "reduce" ?④퀎媛 鍮꾧껐?뺤쟻 寃곌낵瑜??녹쓣 ???덈떎 | 紐낇솗??output ?щ㎎ 吏??|
-| **UI ?뚮━而ㅻ쭅** | ?ㅼ닔??蹂묐젹 SubAgent ?ㅽ뻾 ??Claude Code ?곕??먯뿉???붾㈃ 源쒕묀??諛쒖깮 | 蹂묐젹 ???쒗븳 |
+| **중첩 불가** | SubAgent는 다른 SubAgent를 생성할 수 없다 | 메인 대화에서 순차적으로 체이닝 |
+| **컨텍스트 단절 (Context Amnesia)** | 각 SubAgent는 빈 슬레이트에서 시작 | `prompt` 필드로 충분한 컨텍스트 전달 |
+| **CLAUDE.md 미전파** | 프로젝트 규칙이 자동으로 SubAgent에 전달되지 않을 수 있다 | 시스템 프롬프트 직접 포함 또는 `skills` 활용 |
+| **합성 문제 (Synthesis Problem)** | 여러 SubAgent 결과를 통합하는 "reduce" 단계가 비결정적 결과를 낳을 수 있다 | 명확한 output 포맷 지정 |
+| **UI 플리커링** | 다수의 병렬 SubAgent 실행 시 Claude Code 터미널에서 화면 깜빡임 발생 | 병렬 수 제한 |
 
-### 蹂댁븞怨?沅뚰븳 愿由?
-`permissionMode: bypassPermissions`??紐⑤뱺 沅뚰븳 ?뺤씤??嫄대꼫?곕?濡?洹뱁엳 ?좎쨷?섍쾶 ?ъ슜?댁빞 ?쒕떎. 遺紐??먯씠?꾪듃媛 `bypassPermissions`瑜??ъ슜?섎㈃ ?닿쾬??SubAgent?먮룄 媛뺤젣 ?곸슜?섎ŉ ?ъ젙?섍? 遺덇??ν븯?? ?뷀꽣?꾨씪?댁쫰 ?섍꼍?먯꽌??MCP ?쒕쾭 ?묎렐 ?덉슜/嫄곕? 紐⑸줉??媛?SubAgent蹂꾨줈 ?몃??섍쾶 愿由ы븯怨? ?쒕쾭 ?ㅼ젙 蹂寃??쒕쭏??沅뚰븳???ш??좏빐???쒕떎.
+### 보안과 권한 관리
+
+`permissionMode: bypassPermissions`는 모든 권한 확인을 건너뛰므로 극히 신중하게 사용해야 한다. 부모 에이전트가 `bypassPermissions`를 사용하면 이것이 SubAgent에도 강제 적용되며 재정의가 불가능하다. 엔터프라이즈 환경에서는 MCP 서버 접근 허용/거부 목록을 각 SubAgent별로 세밀하게 관리하고, 서버 설정 변경 시마다 권한을 재검토해야 한다.
 
 ---
 
-## 寃곕줎: SubAgent瑜??쒕?濡??쒖슜?섍린 ?꾪븳 ?듭떖 ?먯튃
+## 결론: SubAgent를 제대로 활용하기 위한 핵심 원칙
 
-Claude Code SubAgent??蹂몄쭏? **而⑦뀓?ㅽ듃 愿由??꾧뎄**?? ?낅┰??AI ?뚯빱媛 ?꾨땶, 硫붿씤 ?먯씠?꾪듃???쒗븳??而⑦뀓?ㅽ듃 ?덈룄?곕? ?⑥쑉?곸쑝濡??쒖슜?섍린 ?꾪븳 ?꾪궎?띿쿂 ?⑦꽩?대떎. 媛???④낵?곸씤 ?쒖슜踰뺤? SubAgent瑜?"?뺣낫 ?섏쭛媛"濡??ъ슜?섍퀬 硫붿씤 ?먯씠?꾪듃瑜?"?ㅽ뻾??濡??좎??섎뒗 寃껋씠?? 紐⑤뱺 寃껋쓣 SubAgent???꾩엫?섎뒗 "??God) ?먯씠?꾪듃" ?묎렐? ?좏겙 ??컻怨?鍮꾧껐?뺤쟻 寃곌낵瑜?珥덈옒?쒕떎.
+Claude Code SubAgent의 본질은 **컨텍스트 관리 도구**다. 독립적 AI 워커가 아닌, 메인 에이전트의 제한된 컨텍스트 윈도우를 효율적으로 활용하기 위한 아키텍처 패턴이다. 가장 효과적인 활용법은 SubAgent를 "정보 수집가"로 사용하고 메인 에이전트를 "실행자"로 유지하는 것이다. 모든 것을 SubAgent에 위임하는 "신(God) 에이전트" 접근은 토큰 폭발과 비결정적 결과를 초래한다.
 
-而ㅻ??덊떚媛 ?섎졃???듭떖 ?먯튃? 紐낇솗?섎떎.
+커뮤니티가 수렴한 핵심 원칙은 명확하다.
 
-| ?먯튃 | ?ㅼ쿇 諛⑸쾿 |
+| 원칙 | 실천 방법 |
 |------|-----------|
-| **?⑥씪 梨낆엫 ?ㅺ퀎** | 媛?SubAgent???섎굹??紐낇솗????븷留??대떦 |
-| **理쒖냼 沅뚰븳** | `tools` ?꾨뱶濡??꾩슂???꾧뎄留??덉슜, `disallowedTools`濡??꾪뿕 ?꾧뎄 李⑤떒 |
-| **紐낇솗??description** | `"Use proactively when..."` 臾멸뎄濡??먮룞 ?꾩엫 ?좊룄 |
-| **紐⑤뜽 怨꾩링??* | ?먯깋=Haiku, 援ы쁽=Sonnet, 蹂듭옟???먮떒=Opus |
-| **異⑸텇??而⑦뀓?ㅽ듃 ?꾨떖** | `prompt` ?꾨뱶??SubAgent媛 ?꾩슂??紐⑤뱺 留λ씫 ?ы븿 |
+| **단일 책임 설계** | 각 SubAgent는 하나의 명확한 역할만 담당 |
+| **최소 권한** | `tools` 필드로 필요한 도구만 허용, `disallowedTools`로 위험 도구 차단 |
+| **명확한 description** | `"Use proactively when..."` 문구로 자동 위임 유도 |
+| **모델 계층화** | 탐색=Haiku, 구현=Sonnet, 복잡한 판단=Opus |
+| **충분한 컨텍스트 전달** | `prompt` 필드에 SubAgent가 필요한 모든 맥락 포함 |
 
-?꾩쭅 CLAUDE.md ?먮룞 ?꾪뙆, 以묒꺽 SubAgent, 援ъ“?붾맂 異쒕젰 ?ㅽ궎留?媛숈? 湲곕뒫??遺?ы븯吏留? 100媛??댁긽??而ㅻ??덊떚 SubAgent ?뺤쓽? ?쒕컻???뚮윭洹몄씤 留덉폆?뚮젅?댁뒪 ?앺깭怨꾧? ??寃⑹감瑜?鍮좊Ⅴ寃?硫붿슦怨??덈떎. SubAgent??Claude Code瑜??⑥닚??肄붾뵫 ?댁떆?ㅽ꽩?몄뿉??**?ㅼ??ㅽ듃?덉씠??媛?ν븳 ?먯씠?꾪듃 ?뚮옯??*?쇰줈 ?꾪솚?쒗궎???듭떖 湲곕뒫?대ŉ, 洹??ㅺ퀎 泥좏븰??蹂듭옟???ㅼ썫蹂대떎 ?듭젣???⑥닚???붿씠 ?ㅼ슜??媛移섏쓽 洹쇱썝?대떎.
+아직 CLAUDE.md 자동 전파, 중첩 SubAgent, 구조화된 출력 스키마 같은 기능이 부재하지만, 100개 이상의 커뮤니티 SubAgent 정의와 활발한 플러그인 마켓플레이스 생태계가 이 격차를 빠르게 메우고 있다. SubAgent는 Claude Code를 단순한 코딩 어시스턴트에서 **오케스트레이션 가능한 에이전트 플랫폼**으로 전환시키는 핵심 기능이며, 그 설계 철학—"복잡한 스웜보다 통제된 단순성"—이 실용적 가치의 근원이다.
 
 ---
 
-## 李멸퀬 ?먮즺
+## 참고 자료
 
-| 援щ텇 | 留곹겕 |
+| 구분 | 링크 |
 |------|------|
-| ?뱰 怨듭떇 臾몄꽌 (?쒓뎅?? | [code.claude.com/docs/ko/sub-agents](https://code.claude.com/docs/ko/sub-agents) |
-| ?뱰 怨듭떇 臾몄꽌 (?곸뼱) | [docs.anthropic.com/en/docs/claude-code/sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) |
-| ?뱰 SDK SubAgent | [platform.claude.com/docs/en/agent-sdk/subagents](https://platform.claude.com/docs/en/agent-sdk/subagents) |
-| ?뵩 而ㅻ??덊떚 SubAgent 100+ | [github.com/VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) |
-| ?뵩 硫?곗뿉?댁쟾???ㅼ??ㅽ듃?덉씠???덉떆 | [github.com/wshobson/agents](https://github.com/wshobson/agents) |
-| ?뱷 PubNub 踰좎뒪???꾨옓?곗뒪 | [pubnub.com/blog/best-practices-for-claude-code-sub-agents](https://www.pubnub.com/blog/best-practices-for-claude-code-sub-agents/) |
-| ?뱷 Task Tool vs SubAgent 鍮꾧탳 | [ibuildwith.ai - Task Tool vs Subagents](https://www.ibuildwith.ai/blog/task-tool-vs-subagents-how-agents-work-in-claude-code/) |
-| ?뱷 ?대? ?꾪궎?띿쿂 遺꾩꽍 | [deepwiki.com - agent-system-and-subagents](https://deepwiki.com/anthropics/claude-code/3.1-agent-system-and-subagents) |
-| ?뱷 ?뷀븳 ?ㅼ닔 & 踰좎뒪???꾨옓?곗뒪 | [claudekit.cc - SubAgent ?ㅽ빐? 吏꾩떎](https://claudekit.cc/blog/vc-04-subagents-from-basic-to-deep-dive-i-misunderstood) |
-| ?뱷 Anthropic ?붿??덉뼱留?釉붾줈洹?| [anthropic.com - building-agents-with-the-claude-agent-sdk](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk) |
-| ?뮠 HackerNews ?좊줎 | [news.ycombinator.com/item?id=44686726](https://news.ycombinator.com/item?id=44686726) |
-| ?맀 GitHub ?댁뒋 (CLAUDE.md 誘몄쟾?? | [github.com/anthropics/claude-code/issues/8395](https://github.com/anthropics/claude-code/issues/8395) |
+| 📖 공식 문서 (한국어) | [code.claude.com/docs/ko/sub-agents](https://code.claude.com/docs/ko/sub-agents) |
+| 📖 공식 문서 (영어) | [docs.anthropic.com/en/docs/claude-code/sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) |
+| 📖 SDK SubAgent | [platform.claude.com/docs/en/agent-sdk/subagents](https://platform.claude.com/docs/en/agent-sdk/subagents) |
+| 🔧 커뮤니티 SubAgent 100+ | [github.com/VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) |
+| 🔧 멀티에이전트 오케스트레이션 예시 | [github.com/wshobson/agents](https://github.com/wshobson/agents) |
+| 📝 PubNub 베스트 프랙티스 | [pubnub.com/blog/best-practices-for-claude-code-sub-agents](https://www.pubnub.com/blog/best-practices-for-claude-code-sub-agents/) |
+| 📝 Task Tool vs SubAgent 비교 | [ibuildwith.ai - Task Tool vs Subagents](https://www.ibuildwith.ai/blog/task-tool-vs-subagents-how-agents-work-in-claude-code/) |
+| 📝 내부 아키텍처 분석 | [deepwiki.com - agent-system-and-subagents](https://deepwiki.com/anthropics/claude-code/3.1-agent-system-and-subagents) |
+| 📝 흔한 실수 & 베스트 프랙티스 | [claudekit.cc - SubAgent 오해와 진실](https://claudekit.cc/blog/vc-04-subagents-from-basic-to-deep-dive-i-misunderstood) |
+| 📝 Anthropic 엔지니어링 블로그 | [anthropic.com - building-agents-with-the-claude-agent-sdk](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk) |
+| 💬 HackerNews 토론 | [news.ycombinator.com/item?id=44686726](https://news.ycombinator.com/item?id=44686726) |
+| 🐛 GitHub 이슈 (CLAUDE.md 미전파) | [github.com/anthropics/claude-code/issues/8395](https://github.com/anthropics/claude-code/issues/8395) |
 
