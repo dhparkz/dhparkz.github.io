@@ -32,7 +32,7 @@ Claude Code는 **총 6종(기본 3종 + 도우미 3종)**의 내장 SubAgent를 
 - **statusline-setup**
 - **Claude Code Guide**
 
-|| SubAgent | 구분 | 모델 | 권한 | 허용 도구 | 역할 |
+| SubAgent | 구분 | 모델 | 권한 | 허용 도구 | 역할 |
 |---|---|---|---|---|---|
 | **Explore** | 기본 | Haiku | 읽기 전용 | 읽기 전용 도구 *(Write/Edit 거부)* | 코드베이스 빠른 탐색 *(quick / medium / very thorough: 3단계)* |
 | **Plan** | 기본 | 주 대화에서 상속 | 읽기 전용 | 읽기 전용 도구 *(Write/Edit 거부)* | Plan Mode에서만 호출, 구현 계획 수립 전 컨텍스트 수집 |
