@@ -10,7 +10,7 @@ description: "Claude Code SubAgent의 개념, 내부 동작, 구성 방식, 실�
 <!--more-->
 # Claude Code SubAgent 뜯어보기
 
-Claude Code의 SubAgent는 **독립된 컨텍스트 윈도우에서 특정 작업을 수행하는 특화된 AI 어시스턴트**다. 메인 에이전트의 컨텍스트를 보존하면서 복잡한 작업을 분할·위임하는 핵심 메커니즘으로, 2025년 중반 도입 이후 Claude Code 아키텍처의 중심축이 되었다. 내장 SubAgent 3종(Explore, Plan, General-purpose)과 사용자 정의 SubAgent를 지원하며, 최대 **10개의 동시 병렬 실행**, YAML frontmatter 기반의 마크다운 파일 구성, MCP 도구 상속을 특징으로 한다. Simon Willison(저명 개발자)의 표현처럼 SubAgent는 본질적으로 **"토큰 컨텍스트 최적화 해킹"** 이며, 최대 ~240,000 토큰을 독립적으로 소비한 뒤 짧은 요약만 부모에게 반환한다.
+Claude Code의 SubAgent는 **독립된 컨텍스트 윈도우에서 특정 작업을 수행하는 특화된 AI 어시스턴트**다. 메인 에이전트의 컨텍스트를 보존하면서 복잡한 작업을 분할·위임하는 핵심 메커니즘으로, 2025년 중반 도입 이후 Claude Code 아키텍처의 중심축이 되었다. 내장 SubAgent 6종(Explore, Plan, General-purpose + 도우미 SubAgent 3종)과 사용자 정의 SubAgent를 지원하며, 최대 **15개의 동시 병렬 실행**(`--concurrency` 플래그로 1-15 설정, 기본값 7), YAML frontmatter 기반의 마크다운 파일 구성, MCP 도구 상속을 특징으로 한다. Simon Willison(저명 개발자)의 표현처럼 SubAgent는 본질적으로 **"토큰 컨텍스트 최적화 해킹"** 이며, 최대 ~240,000 토큰을 독립적으로 소비한 뒤 짧은 요약만 부모에게 반환한다.
 
 ---
 
@@ -108,8 +108,11 @@ MCP 도구 검색에서도 최적화가 적용된다. v2.1.7부터 MCP 도구 �
 
 ### 병렬 실행과 제한사항
 
-[reddit에서 검색된 정보](https://www.reddit.com/r/ClaudeAI/comments/1lk0usp/subagent_testing_what_happens_when_you_throw_100)에 따르면,
-Claude Code는 최대 **10개의 동시 SubAgent 태스크**를 지원하는것으로 보이며, 초과 요청은 지능적 큐잉으로 처리한다. SubAgent는 기본적으로 백그라운드에서 실행되며, 메인 에이전트는 SubAgent 실행 중에도 사용자 입력을 받을 수 있다. `Ctrl+B`로 실행 중인 태스크를 수동으로 백그라운드 전환할 수 있고, `/tasks` 다이얼로그에서 모든 활성 백그라운드 태스크의 실시간 상태를 확인할 수 있다.
+Claude Code는 `--concurrency [n]` 플래그로 동시 SubAgent 수를 제어할 수 있다 (**범위 1-15, 기본값 7**). 초과 요청은 지능적 큐잉으로 처리한다. SubAgent는 기본적으로 포그라운드에서 실행되지만, YAML frontmatter에 `background: true`를 설정하거나 `run_in_background` 파라미터를 사용하여 백그라운드에서 실행할 수 있다. 메인 에이전트는 SubAgent 실행 중에도 사용자 입력을 받을 수 있다. `Ctrl+B`로 실행 중인 태스크를 수동으로 백그라운드 전환할 수 있고, `/tasks` 다이얼로그에서 모든 활성 백그라운드 태스크의 실시간 상태를 확인할 수 있다.
+
+v2.1.49에서 추가된 **`isolation: worktree`** 옵션은 Git worktree 기반의 격리 실행을 지원한다. 이 모드에서는 SubAgent가 별도의 worktree에서 작업하므로 메인 작업 디렉토리와 파일 충돌이 없으며, **CLAUDE.md가 자동으로 로드**된다는 중요한 특징이 있다 (일반 SubAgent에서는 전파되지 않음).
+
+`claude agents` CLI 명령어(v2.1.50)로 등록된 에이전트 목록을 확인할 수 있다.
 
 다만 백그라운드 SubAgent에는 중요한 제한이 있다.
 
@@ -125,13 +128,35 @@ Claude Code는 최대 **10개의 동시 SubAgent 태스크**를 지원하는것�
 
 v2.1.16에서 도입된 **Tasks 시스템**은 DAG(방향성 비순환 그래프) 기반 의존성 추적을 지원한다. `blocks`/`blockedBy` 관계로 태스크 간 선후 관계를 정의할 수 있으며, 상태는 `~/.claude/tasks/` 디렉토리에 저장된다. 도구 사용 후에는 현재 태스크 목록 상태가 시스템 메시지로 자동 주입되어 목표를 잃지 않도록 한다.
 
-SubAgent 라이프사이클은 Hook 시스템과 연동된다. **SubagentStart**(SubAgent 생성 시)와 **SubagentStop**(완료 시, `agent_id`·`agent_transcript_path` 포함) 이벤트를 통해 결정론적 스크립트를 실행할 수 있다.
+SubAgent 라이프사이클은 Hook 시스템과 연동된다. Claude Code는 현재 **총 18개의 Hook 이벤트**를 지원한다.
 
-| Hook 유형 | 설명 |
-|-----------|------|
-| `command` | 셸 명령 실행 |
-| `prompt` | LLM 프롬프트 평가 |
-| `agent` | 도구를 사용하는 에이전트 검증자 |
+| Hook 이벤트 | 시점 | SubAgent 관련성 |
+|-------------|------|:---:|
+| `SessionStart` | 세션 시작 시 | - |
+| `UserPromptSubmit` | 사용자 입력 제출 시 | - |
+| `PreToolUse` | 도구 실행 전 | ✅ |
+| `PermissionRequest` | 권한 요청 시 | - |
+| `PostToolUse` | 도구 실행 후 | ✅ |
+| `PostToolUseFailure` | 도구 실패 후 | ✅ |
+| `Notification` | 알림 발생 시 | - |
+| **`SubagentStart`** | SubAgent 생성 시 | ✅ 핵심 |
+| **`SubagentStop`** | SubAgent 완료 시 (`agent_id`, `agent_transcript_path`, `last_assistant_message` 포함) | ✅ 핵심 |
+| `Stop` | 세션 종료 시 | ✅ |
+| `TeammateIdle` | 팀원 에이전트 대기 시 | - |
+| `TaskCompleted` | 태스크 완료 시 | ✅ |
+| `ConfigChange` | 설정 변경 시 | - |
+| `WorktreeCreate` | Worktree 생성 시 | ✅ isolation 관련 |
+| `WorktreeRemove` | Worktree 제거 시 | ✅ isolation 관련 |
+| `PreCompact` | 컨텍스트 압축 전 | - |
+| `SessionEnd` | 세션 종료 완료 | - |
+
+> v2.1.47에서 `SubagentStop`에 `last_assistant_message` 필드가 추가되어, SubAgent의 마지막 응답 텍스트를 Hook에서 직접 접근할 수 있게 되었다.
+
+| Hook 유형 | 설명 | 비고 |
+|-----------|------|------|
+| `command` | 셸 명령 실행 | `"async": true`로 비동기 실행 가능 |
+| `prompt` | LLM 프롬프트 평가 | Yes/No 판단 |
+| `agent` | 도구를 사용하는 에이전트 검증자 | 최대 50턴까지 도구 접근 가능 |
 
 SubAgent의 frontmatter에서도 `PreToolUse`·`PostToolUse`·`Stop` Hook을 직접 정의할 수 있으며, 해당 SubAgent 실행이 완료되면 자동 정리된다.
 
@@ -168,9 +193,14 @@ memory: user
 | `tools` | 허용 도구 목록 (생략 시 MCP 포함 모든 도구 상속) | `Read, Grep, Glob, Bash, ...` |
 | `disallowedTools` | 거부 도구 목록 | `Write, Edit, ...` |
 | `model` | 사용할 모델 | `sonnet` / `opus` / `haiku` / `inherit` |
-| `permissionMode` | 권한 모드 | `default` / `acceptEdits` / `bypassPermissions` / `plan` / `ignore` |
+| `permissionMode` | 권한 모드 | `default` / `acceptEdits` / `bypassPermissions` / `dontAsk` / `plan` / `ignore` |
 | `skills` | 자동 로드할 스킬 | 스킬 이름 |
+| `mcpServers` | 활성화할 MCP 서버 | 서버 이름 목록 |
+| `maxTurns` | 최대 에이전트 턴 수 (비용 폭주 방지) | 양의 정수 |
 | `memory` | 세션 간 지속 메모리 스코프 (`MEMORY.md` 첫 200줄 자동 주입) | `user` / `project` / `local` |
+| `background` | 백그라운드 실행 (v2.1.49) | `true` / `false` |
+| `isolation` | 실행 격리 모드 (v2.1.49) | `worktree` (Git worktree 격리, CLAUDE.md 자동 로드) |
+| `hooks` | SubAgent 전용 Hook 정의 | `PreToolUse` / `PostToolUse` / `Stop` |
 
 ### Tools 전체 참조
 
@@ -295,14 +325,17 @@ MCP 도구 접근은 `mcp__{서버명}__{도구명}` 명명규칙을 사용하�
 
 ### CLAUDE.md와의 관계
 
-중요한 점은, **CLAUDE.md의 내용이 SubAgent에 자동 전파되지 않는다**는 것이다. 공식 문서에서는 SubAgent가 프로젝트의 CLAUDE.md 지침을 상속한다고 언급하지만, 실제 GitHub 이슈([#8395](https://github.com/anthropics/claude-code/issues/8395), [#18352](https://github.com/anthropics/claude-code/issues/18352))에서 사용자들은 이 동작이 불완전하다고 보고하고 있다.
+중요한 점은, **일반 SubAgent에서는 CLAUDE.md의 내용이 자동 전파되지 않는다**는 것이다. 공식 문서에서는 SubAgent가 프로젝트의 CLAUDE.md 지침을 상속한다고 언급하지만, 실제 GitHub 이슈(#8395, #18352)에서 사용자들은 이 동작이 불완전하다고 보고하고 있다.
+
+**예외**: v2.1.49에서 추가된 `isolation: worktree` 모드를 사용하면 SubAgent가 별도의 Git worktree에서 실행되며, 이 경우 **CLAUDE.md가 자동으로 로드**된다. 이는 worktree가 프로젝트 디렉토리의 복제본이기 때문에 Claude Code의 일반적인 CLAUDE.md 로딩 메커니즘이 정상 작동하기 때문이다.
 
 | 해결책 | 설명 | 권장 여부 |
 |--------|------|-----------|
-| 시스템 프롬프트에 직접 포함 | 각 SubAgent `.md` 파일 본문에 규칙 명시 | ✅ 가장 확실 |
+| `isolation: worktree` 사용 (v2.1.49) | Git worktree 격리 모드에서 CLAUDE.md 자동 로드 | ✅ 가장 확실 (파일 충돌 방지 + 규칙 자동 적용) |
+| 시스템 프롬프트에 직접 포함 | 각 SubAgent `.md` 파일 본문에 규칙 명시 | ✅ 확실하지만 중복 관리 |
 | `skills` 필드로 공통 스킬 로드 | 공통 규칙을 스킬 파일로 분리 후 자동 로드 | ✅ 재사용성 높음 |
-| `context: fork` 활용 (v2.1+) | Skill이 SubAgent 컨텍스트에 자동 주입되는 방식으로 우회 | ✅ 가장 우아한 해법 |
-| CLAUDE.md 상속 기대 | 현재 불완전하게 동작 | ❌ 비권장 |
+| `context: fork` 활용 (v2.1+) | Skill이 SubAgent 컨텍스트에 자동 주입 | ✅ 우아한 해법 |
+| CLAUDE.md 상속 기대 (일반 모드) | 불완전하게 동작 | ❌ 비권장 |
 
 ### context: fork — Skills와 SubAgent의 교차점 (v2.1+)
 
@@ -350,7 +383,7 @@ context: fork 사용:
 | `Explore` | 코드베이스 탐색 특화 (Haiku 모델, 읽기 전용) |
 | 커스텀 에이전트 이름 | `.claude/agents/`에 정의한 사용자 정의 에이전트 |
 
-> ⚠️ **알려진 버그 (GitHub 이슈 #17283)**: Skill 도구를 통해 호출할 때 `context: fork`와 `agent:` 필드가 무시되고 메인 대화 컨텍스트에서 실행되는 버그가 보고돼 있다. 2025년 1월 기준 아직 완전히 안정화된 기능은 아니므로, 중요한 워크플로우에 적용 전 반드시 동작을 검증해야 한다.
+> ~~⚠️ **이전 알려진 버그 (GitHub 이슈 #17283)**: Skill 도구를 통해 호출할 때 `context: fork`와 `agent:` 필드가 무시되고 메인 대화 컨텍스트에서 실행되는 버그가 보고됐었다.~~ **2026년 2월 기준**, 최신 버전에서 이 버그는 **수정 완료**된 것으로 보인다 (공식 문서에서 더 이상 언급되지 않음). 다만 중요한 워크플로우에 적용 전 동작 검증을 권장한다.
 
 ### Skills, Commands, SubAgents의 수렴 (v2.1의 큰 그림)
 
@@ -404,9 +437,11 @@ sequenceDiagram
 
 ### 디렉토리 구조
 
+> ⚠️ **중요**: Skills는 반드시 **디렉토리 + SKILL.md** 구조여야 한다. 단일 `.md` 파일로는 인식되지 않는다.
+
 ```
-skill-name/
-├── SKILL.md           ← 필수: frontmatter + 지침
+skill-name/            ← 디렉토리 이름 = 스킬 이름
+├── SKILL.md           ← 필수: frontmatter + 지침 (파일명 반드시 SKILL.md)
 ├── scripts/           ← 옵션: Python/Bash 실행 스크립트
 │   └── extract.py
 ├── references/        ← 옵션: 필요 시 로드되는 참조 문서
@@ -415,6 +450,8 @@ skill-name/
 └── assets/            ← 옵션: 출력에 사용되는 템플릿·폰트 등
     └── template.docx
 ```
+
+모노레포에서는 하위 디렉토리의 `.claude/skills/`도 **자동 탐색(nested skills auto-discovery)**된다.
 
 저장 위치:
 - **사용자 전역**: `~/.claude/skills/skill-name/`
@@ -430,6 +467,7 @@ description: |                 # 필수: 1024자 이하, 자동 호출 판단의
   Kotlin 코드를 리뷰한다. PR 리뷰, 코드 품질 검사,
   아키텍처 패턴 확인 시 사용. "리뷰", "코드 검사",
   "PR 확인" 등의 키워드에 반응.
+argument-hint: "<PR number or file path>"  # 옵션: autocomplete 힌트
 allowed-tools: Read, Grep, Glob  # 옵션: 허용 도구 제한
 context: main                    # 옵션: main(기본) | fork
 agent: code-reviewer             # 옵션: context:fork 시 주입할 에이전트
@@ -442,6 +480,7 @@ user-invocable: false            # 옵션: false면 Claude만 자동 로드, /�
 |------|------|------|
 | `name` | ✅ | 슬래시 커맨드 이름이 됨 (`/name`) |
 | `description` | ✅ | Claude의 자동 호출 판단 기준. **"when to use"를 여기에 모두 서술** |
+| `argument-hint` | ❌ | `/skill-name` 뒤에 표시되는 autocomplete 힌트 (예: `"<PR number>"`) |
 | `allowed-tools` | ❌ | 이 스킬 실행 시 허용할 도구 목록 |
 | `context` | ❌ | `main`(기본) 또는 `fork`(격리 SubAgent에서 실행) |
 | `agent` | ❌ | `context: fork` 시 주입할 에이전트 타입 |
@@ -484,6 +523,36 @@ scripts/extract.py         ← 스크립트 출력만 컨텍스트 소비
 ```
 
 이 구조 덕분에 방대한 API 문서, 대규모 예시, 데이터셋을 번들해도 **실제로 접근되기 전까지 컨텍스트 토큰을 소비하지 않는다.**
+
+### 고급 Skill 기능
+
+#### 문자열 치환 (String Substitutions)
+
+Skill 본문에서 다음 변수를 사용할 수 있다:
+
+| 변수 | 설명 | 예시 |
+|------|------|------|
+| `$ARGUMENTS` | 슬래시 커맨드 뒤의 전체 인자 | `/review src/main` → `$ARGUMENTS` = `"src/main"` |
+| `$ARGUMENTS[N]` | N번째 인자 (0-indexed) | `/review src/main --strict` → `$ARGUMENTS[0]` = `"src/main"` |
+| `${CLAUDE_SESSION_ID}` | 현재 세션 고유 ID | 결과 파일 네이밍에 유용 |
+
+#### 동적 컨텍스트 (`` !`command` ``)
+
+Skill 본문에서 셸 명령의 실행 결과를 동적으로 삽입할 수 있다:
+
+```markdown
+## 현재 Git 상태
+!`git status --short`
+
+## 최근 변경된 파일
+!`git diff --name-only HEAD~3`
+```
+
+이를 통해 Skill이 실행될 때마다 최신 프로젝트 상태를 컨텍스트에 포함할 수 있다.
+
+#### Extended Thinking
+
+Skill 본문에 `"ultrathink"` 키워드를 포함하면 Claude의 extended thinking 모드가 활성화된다. 복잡한 분석이 필요한 Skill에 유용하다.
 
 ### Skill 설계 철학
 
@@ -714,8 +783,8 @@ Claude Code SubAgent의 본질은 **컨텍스트 관리 도구**다. 독립적 A
 
 | 구분 | 링크 |
 |------|------|
-| 📖 SubAgent - claude code 공식 문서 (한국어) | [code.claude.com/docs/ko/sub-agents](https://code.claude.com/docs/ko/sub-agents) |
-| 📖 SubAgent - claude code 공식 문서 (영어) | [https://code.claude.com/docs/en/sub-agents](https://code.claude.com/docs/en/sub-agents) |
+| 📖 공식 문서 (한국어) | [code.claude.com/docs/ko/sub-agents](https://code.claude.com/docs/ko/sub-agents) |
+| 📖 공식 문서 (영어) | [docs.anthropic.com/en/docs/claude-code/sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) |
 | 📖 SDK SubAgent | [platform.claude.com/docs/en/agent-sdk/subagents](https://platform.claude.com/docs/en/agent-sdk/subagents) |
 | 🔧 커뮤니티 SubAgent 100+ | [github.com/VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) |
 | 🔧 멀티에이전트 오케스트레이션 예시 | [github.com/wshobson/agents](https://github.com/wshobson/agents) |
@@ -726,4 +795,5 @@ Claude Code SubAgent의 본질은 **컨텍스트 관리 도구**다. 독립적 A
 | 📝 Anthropic 엔지니어링 블로그 | [anthropic.com - building-agents-with-the-claude-agent-sdk](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk) |
 | 💬 HackerNews 토론 | [news.ycombinator.com/item?id=44686726](https://news.ycombinator.com/item?id=44686726) |
 | 🐛 GitHub 이슈 (CLAUDE.md 미전파) | [github.com/anthropics/claude-code/issues/8395](https://github.com/anthropics/claude-code/issues/8395) |
+
 
