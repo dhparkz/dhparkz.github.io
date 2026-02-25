@@ -2,8 +2,9 @@
   "task_id": "BLOG-20260225-133205",
   "title": "클로드 코드 꿀팁 조사/정리/초안",
   "slug": "claude-code-tips",
-  "state": "DRAFTED",
-  "hop_limit": 2,
+  "state": "EDITED",
+  "hop_limit": 1,
+  "branch": "feature/draft-BLOG-20260225-133205",
   "created_at": "2026-02-25T13:32:05.741291+09:00",
   "created_by": "blog-main",
   "history": [
@@ -26,17 +27,27 @@
       "reason": "User requested RESEARCHED transition in #blog-work (retry)"
     },
     {
-      "at": "2026-02-25T15:06:07.5920990+09:00",
+      "at": "2026-02-25T15:06:07.592099+09:00",
       "from": "RESEARCHED",
       "to": "DRAFTED",
       "reason": "DRAFTED generated from plan/research"
+    },
+    {
+      "at": "2026-02-26T04:40:36.1712053+09:00",
+      "from": "DRAFTED",
+      "to": "EDITED",
+      "reason": "Applied citation-footnote formatting and review polish",
+      "branch": "feature/draft-BLOG-20260225-133205",
+      "commit": "d1886087fa32588278d5ef2e375166dd8bb8ff74",
+      "required_output": ".openclaw-blog/tasks/BLOG-20260225-133205/edit.md"
     }
   ],
   "idempotency": {
     "seen_event_ids": [
       "blog-main-20260225-continue-plan-1",
       "1476097518650785864",
-      "1476099000010000001"
+      "1476099000010000001",
+      "1476112001000000002"
     ]
   }
 }
