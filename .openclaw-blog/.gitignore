@@ -1,2 +1,7 @@
+# Track task artifacts for review-by-commit workflow.
 tasks/*
 !tasks/.gitkeep
+!tasks/**/
+!tasks/**/*.md
+!tasks/**/approval.txt
+!tasks/**/state.json

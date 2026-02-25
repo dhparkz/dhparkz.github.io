@@ -7,10 +7,39 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent $root
 $tasksRoot = Join-Path $root 'tasks'
 New-Item -ItemType Directory -Force -Path $tasksRoot | Out-Null
 
+function Invoke-Git {
+  param(
+    [string]$Cwd,
+    [string[]]$Args
+  )
+  $output = & git -C $Cwd @Args 2>&1
+  if($LASTEXITCODE -ne 0){
+    throw "git failed ($($Args -join ' ')): $output"
+  }
+  return ($output -join "`n").Trim()
+}
+
 $taskId = 'BLOG-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
+$branch = "feature/draft_$taskId"
+
+# Mandatory branch policy: create/switch to feature/draft_<task_id> before task work.
+$branchExists = $true
+try {
+  Invoke-Git -Cwd $repoRoot -Args @('show-ref','--verify',"refs/heads/$branch") | Out-Null
+} catch {
+  $branchExists = $false
+}
+
+if($branchExists){
+  Invoke-Git -Cwd $repoRoot -Args @('checkout',$branch) | Out-Null
+} else {
+  Invoke-Git -Cwd $repoRoot -Args @('checkout','-b',$branch) | Out-Null
+}
+
 $taskDir = Join-Path $tasksRoot $taskId
 New-Item -ItemType Directory -Force -Path $taskDir | Out-Null
 
@@ -26,6 +55,7 @@ $state = [ordered]@{
   task_id = $taskId
   title = $Title
   slug = $Slug
+  branch = $branch
   state = 'IDEA'
   hop_limit = 5
   created_at = (Get-Date).ToString('o')
@@ -36,6 +66,7 @@ $state = [ordered]@{
       from = $null
       to = 'IDEA'
       reason = 'task created'
+      branch = $branch
     }
   )
   idempotency = [ordered]@{
@@ -51,4 +82,5 @@ $state | ConvertTo-Json -Depth 8 | Set-Content -Path $statePath -Encoding UTF8
   task_id = $taskId
   task_dir = $taskDir
   state = 'IDEA'
+  branch = $branch
 } | ConvertTo-Json -Depth 6

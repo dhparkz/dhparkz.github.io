@@ -8,11 +8,31 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent $root
 $taskDir = Join-Path (Join-Path $root 'tasks') $TaskId
 $statePath = Join-Path $taskDir 'state.json'
 if(-not (Test-Path $statePath)){ throw "state.json not found: $statePath" }
 
 $state = Get-Content $statePath -Raw | ConvertFrom-Json
+
+function Invoke-Git {
+  param(
+    [string]$Cwd,
+    [string[]]$Args
+  )
+  $output = & git -C $Cwd @Args 2>&1
+  if($LASTEXITCODE -ne 0){
+    throw "git failed ($($Args -join ' ')): $output"
+  }
+  return ($output -join "`n").Trim()
+}
+
+$expectedBranch = if($state.branch){ [string]$state.branch } else { "feature/draft_$TaskId" }
+$currentBranch = Invoke-Git -Cwd $repoRoot -Args @('rev-parse','--abbrev-ref','HEAD')
+if($currentBranch -ne $expectedBranch){
+  [ordered]@{ ok=$false; error='branch_mismatch'; expected=$expectedBranch; actual=$currentBranch } | ConvertTo-Json -Depth 6
+  exit 12
+}
 
 $nextMap = @{
   'IDEA' = 'PLAN'
@@ -26,7 +46,7 @@ $nextMap = @{
 $current = [string]$state.state
 $expected = $nextMap[$current]
 if($expected -ne $TargetState){
-  [ordered]@{ ok=$false; error="invalid transition"; current=$current; expected_next=$expected; requested=$TargetState } | ConvertTo-Json -Depth 6
+  [ordered]@{ ok=$false; error='invalid_transition'; current=$current; expected_next=$expected; requested=$TargetState } | ConvertTo-Json -Depth 6
   exit 2
 }
 
@@ -53,7 +73,8 @@ $requiredFileByTarget = @{
   'PUBLISHED' = 'published.md'
 }
 
-$required = Join-Path $taskDir $requiredFileByTarget[$TargetState]
+$requiredName = $requiredFileByTarget[$TargetState]
+$required = Join-Path $taskDir $requiredName
 if(-not (Test-Path $required)){
   [ordered]@{ ok=$false; error='missing_output'; required=$required } | ConvertTo-Json -Depth 6
   exit 4
@@ -99,8 +120,27 @@ if($TargetState -eq 'PUBLISHED'){
   }
 }
 
+$requiredRelative = ".openclaw-blog/tasks/$TaskId/$requiredName"
+$stageCommit = ''
+try {
+  $stageCommit = Invoke-Git -Cwd $repoRoot -Args @('log','-n','1','--pretty=%H','--',$requiredRelative)
+} catch {
+  $stageCommit = ''
+}
+
+if([string]::IsNullOrWhiteSpace($stageCommit)){
+  [ordered]@{
+    ok = $false
+    error = 'missing_commit_for_output'
+    required = $required
+    hint = "Commit $requiredRelative before transition"
+  } | ConvertTo-Json -Depth 6
+  exit 11
+}
+
 $from = $current
 $state.state = $TargetState
+$state.branch = $expectedBranch
 $state.hop_limit = [int]$state.hop_limit - 1
 if($EventId){ $state.idempotency.seen_event_ids += $EventId }
 $state.history += [pscustomobject]@{
@@ -108,6 +148,9 @@ $state.history += [pscustomobject]@{
   from = $from
   to = $TargetState
   reason = $Reason
+  branch = $expectedBranch
+  commit = $stageCommit
+  required_output = $requiredRelative
 }
 
 $state | ConvertTo-Json -Depth 12 | Set-Content -Path $statePath -Encoding UTF8
@@ -119,4 +162,6 @@ $state | ConvertTo-Json -Depth 12 | Set-Content -Path $statePath -Encoding UTF8
   to = $TargetState
   hop_limit = $state.hop_limit
   required_output = $required
-} | ConvertTo-Json -Depth 6
+  branch = $expectedBranch
+  commit = $stageCommit
+} | ConvertTo-Json -Depth 8
