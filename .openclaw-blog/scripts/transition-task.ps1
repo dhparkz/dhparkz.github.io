@@ -1,4 +1,4 @@
-param(
+﻿param(
   [Parameter(Mandatory=$true)][string]$TaskId,
   [Parameter(Mandatory=$true)][ValidateSet('PLAN','RESEARCHED','DRAFTED','EDITED','PUBLISH_READY','PUBLISHED')][string]$TargetState,
   [string]$Reason = '',
@@ -18,17 +18,17 @@ $state = Get-Content $statePath -Raw | ConvertFrom-Json
 function Invoke-Git {
   param(
     [string]$Cwd,
-    [string[]]$Args
+    [string[]]$GitArgs
   )
-  $output = & git -C $Cwd @Args 2>&1
+  $output = & git -C $Cwd @GitArgs 2>&1
   if($LASTEXITCODE -ne 0){
-    throw "git failed ($($Args -join ' ')): $output"
+    throw "git failed ($($GitArgs -join ' ')): $output"
   }
   return ($output -join "`n").Trim()
 }
 
 $expectedBranch = if($state.branch){ [string]$state.branch } else { "feature/draft_$TaskId" }
-$currentBranch = Invoke-Git -Cwd $repoRoot -Args @('rev-parse','--abbrev-ref','HEAD')
+$currentBranch = Invoke-Git -Cwd $repoRoot -GitArgs @('rev-parse','--abbrev-ref','HEAD')
 if($currentBranch -ne $expectedBranch){
   [ordered]@{ ok=$false; error='branch_mismatch'; expected=$expectedBranch; actual=$currentBranch } | ConvertTo-Json -Depth 6
   exit 12
@@ -121,9 +121,29 @@ if($TargetState -eq 'PUBLISHED'){
 }
 
 $requiredRelative = ".openclaw-blog/tasks/$TaskId/$requiredName"
+
+# Enforce commit-after-edit: auto-commit the stage output when it is dirty/untracked.
+$dirty = Invoke-Git -Cwd $repoRoot -GitArgs @('status','--porcelain','--',$requiredRelative)
+if(-not [string]::IsNullOrWhiteSpace($dirty)){
+  try {
+    Invoke-Git -Cwd $repoRoot -GitArgs @('add','--',$requiredRelative) | Out-Null
+    $commitMessage = "blog($TaskId): $($TargetState.ToLowerInvariant()) output"
+    Invoke-Git -Cwd $repoRoot -GitArgs @('commit','-m',$commitMessage,'--',$requiredRelative) | Out-Null
+  } catch {
+    [ordered]@{
+      ok = $false
+      error = 'auto_commit_failed'
+      required = $required
+      branch = $expectedBranch
+      details = $_.Exception.Message
+    } | ConvertTo-Json -Depth 8
+    exit 13
+  }
+}
+
 $stageCommit = ''
 try {
-  $stageCommit = Invoke-Git -Cwd $repoRoot -Args @('log','-n','1','--pretty=%H','--',$requiredRelative)
+  $stageCommit = Invoke-Git -Cwd $repoRoot -GitArgs @('log','-n','1','--pretty=%H','--',$requiredRelative)
 } catch {
   $stageCommit = ''
 }
@@ -133,7 +153,7 @@ if([string]::IsNullOrWhiteSpace($stageCommit)){
     ok = $false
     error = 'missing_commit_for_output'
     required = $required
-    hint = "Commit $requiredRelative before transition"
+    hint = "Commit tracking failed for $requiredRelative. Check .gitignore and branch state."
   } | ConvertTo-Json -Depth 6
   exit 11
 }
@@ -155,6 +175,18 @@ $state.history += [pscustomobject]@{
 
 $state | ConvertTo-Json -Depth 12 | Set-Content -Path $statePath -Encoding UTF8
 
+$syncRaw = & (Join-Path $PSScriptRoot 'commit-push-task.ps1') -TaskId $TaskId -Message "blog($TaskId): transition $from -> $TargetState" -Branch $expectedBranch
+$sync = $syncRaw | ConvertFrom-Json
+if(-not $sync.ok){
+  [ordered]@{
+    ok = $false
+    error = 'push_failed_after_transition'
+    task_id = $TaskId
+    branch = $expectedBranch
+  } | ConvertTo-Json -Depth 6
+  exit 14
+}
+
 [ordered]@{
   ok = $true
   task_id = $TaskId
@@ -164,4 +196,7 @@ $state | ConvertTo-Json -Depth 12 | Set-Content -Path $statePath -Encoding UTF8
   required_output = $required
   branch = $expectedBranch
   commit = $stageCommit
+  pushed = $sync.pushed
+  remote_commit = $sync.commit
 } | ConvertTo-Json -Depth 8
+

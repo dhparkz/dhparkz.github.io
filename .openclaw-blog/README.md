@@ -6,7 +6,7 @@
 1. task는 `.openclaw-blog/tasks/<task_id>` 하위 파일로 관리한다.
 2. task 생성 직후 브랜치 `feature/draft_<task_id>`를 생성/체크아웃해서 작업한다.
 3. 상태 전이는 스크립트 성공 시에만 인정한다.
-4. 단계 산출물은 반드시 파일로 남기고, 해당 파일이 커밋되어 있어야 전이할 수 있다.
+4. 단계 산출물은 반드시 파일로 남기고 commit+push 되어야 한다(전이 여부 무관, 멀티턴 수정 포함).
 5. 채팅 메시지는 "요약 + 파일 경로 + 커밋 해시" 중심으로 최소화한다.
 
 ## 구조
@@ -21,8 +21,9 @@
 - `tasks/<task_id>/approval.txt` : 사람 승인 기록(필수, PUBLISHED 전이 게이트)
 
 ## 스크립트
-- `scripts/init-task.ps1` : task 생성 + 브랜치(`feature/draft_<task_id>`) 생성/체크아웃
-- `scripts/transition-task.ps1` : 상태 전이 게이트 검증 + 전이 실행
+- `scripts/init-task.ps1` : task 생성 + 브랜치(`feature/draft_<task_id>`) 생성/체크아웃 + 초기 commit/push
+- `scripts/commit-push-task.ps1` : task 파일 변경사항 commit/push (멀티턴 수정 공통)
+- `scripts/transition-task.ps1` : 상태 전이 게이트 검증 + 전이 실행 + 후속 commit/push
   - 검증: 브랜치 일치, 파일 형식, 커밋 존재, 승인 파일
 
 ## 상세 운영 문서

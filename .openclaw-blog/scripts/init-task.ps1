@@ -77,10 +77,18 @@ $state = [ordered]@{
 $statePath = Join-Path $taskDir 'state.json'
 $state | ConvertTo-Json -Depth 8 | Set-Content -Path $statePath -Encoding UTF8
 
+$syncRaw = & (Join-Path $PSScriptRoot 'commit-push-task.ps1') -TaskId $taskId -Message "blog($taskId): initialize task" -Branch $branch
+$sync = $syncRaw | ConvertFrom-Json
+if(-not $sync.ok){
+  throw "initial commit/push failed for $taskId"
+}
+
 [ordered]@{
   ok = $true
   task_id = $taskId
   task_dir = $taskDir
   state = 'IDEA'
   branch = $branch
+  commit = $sync.commit
+  pushed = $sync.pushed
 } | ConvertTo-Json -Depth 6

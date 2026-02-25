@@ -13,9 +13,10 @@
 
 1. 블로그 작업을 `task_id` 단위로 관리한다.
 2. task별 작업 브랜치 `feature/draft_<task_id>`를 강제한다.
-3. 상태 전이는 파일 산출물 + 커밋 게이트를 통과할 때만 허용한다.
-4. 사람 승인(Human-in-the-loop)을 발행 직전에 강제한다.
-5. 채팅은 요약/지시/상태보고 중심으로 최소화한다.
+3. task 파일 변경은 전이 여부와 무관하게 매 턴 commit+push를 강제한다.
+4. 상태 전이는 파일 산출물 + 커밋 게이트를 통과할 때만 허용한다.
+5. 사람 승인(Human-in-the-loop)을 발행 직전에 강제한다.
+6. 채팅은 요약/지시/상태보고 중심으로 최소화한다.
 
 ---
 
@@ -31,6 +32,7 @@
   - 현재 브랜치 = `feature/draft_<task_id>`
   - 대상 단계 산출물 파일 존재 + 형식 키 통과
   - 대상 단계 산출물 파일이 git commit에 기록됨
+  - 전이 시 후속 `commit-push-task.ps1`로 commit/push 수행
 - PUBLISHED 추가
   - `approval.txt` 존재(사람 승인)
 
@@ -95,6 +97,7 @@
 
 ## blog-main
 - task 생성, 브랜치 생성/체크아웃, 상태 전이, 전문 에이전트 호출/통합 보고 담당
+- 파일 변경이 발생한 턴마다 `commit-push-task.ps1`를 호출해 원격 반영 보장
 - 채팅에는 "요약 + 파일 경로 + 커밋 해시"만 보고
 
 ## specialist (strategy/research/writer/editor/publisher)
@@ -107,12 +110,12 @@
 
 ## 6) 표준 운영 플로우
 
-1. `#blog`로 task 생성 (`init-task.ps1`) → 브랜치 `feature/draft_<task_id>` 자동 전환
+1. `#blog`로 task 생성 (`init-task.ps1`) → 브랜치 `feature/draft_<task_id>` 자동 전환 + 초기 push
 2. (선택) IDEA 토론 (`#debate on/off`)
-3. 각 단계 반복:
+3. 각 단계/멀티턴 반복:
    - 산출물 파일 작성(`tasks/<task_id>/`)
-   - 커밋 생성
-   - `transition-task.ps1` 실행
+   - `commit-push-task.ps1` 실행(매 턴)
+   - 상태 전이가 필요한 턴에만 `transition-task.ps1` 실행
 4. `approval.txt` 기록 후 `PUBLISHED` 전이
 
 권장 커밋 메시지:
