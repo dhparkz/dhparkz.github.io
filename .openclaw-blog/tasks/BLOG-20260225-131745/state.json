@@ -1,0 +1,26 @@
+{
+  "task_id": "BLOG-20260225-131745",
+  "title": "test",
+  "slug": "",
+  "state": "PLAN",
+  "hop_limit": 4,
+  "created_at": "2026-02-25T13:17:45.5919543+09:00",
+  "created_by": "blog-main",
+  "history": [
+    {
+      "at": "2026-02-25T13:17:45.6006603+09:00",
+      "from": null,
+      "to": "IDEA",
+      "reason": "task created"
+    },
+    {
+      "at": "2026-02-25T13:17:54.9401734+09:00",
+      "from": "IDEA",
+      "to": "PLAN",
+      "reason": "test"
+    }
+  ],
+  "idempotency": {
+    "seen_event_ids": []
+  }
+}
