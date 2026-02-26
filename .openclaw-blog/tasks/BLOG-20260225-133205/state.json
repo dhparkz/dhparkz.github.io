@@ -2,8 +2,8 @@
   "task_id": "BLOG-20260225-133205",
   "title": "클로드 코드 꿀팁 조사/정리/초안",
   "slug": "claude-code-tips",
-  "state": "EDITED",
-  "hop_limit": 1,
+  "state": "PUBLISH_READY",
+  "hop_limit": 0,
   "branch": "feature/draft-BLOG-20260225-133205",
   "created_at": "2026-02-25T13:32:05.741291+09:00",
   "created_by": "blog-main",
@@ -40,6 +40,15 @@
       "branch": "feature/draft-BLOG-20260225-133205",
       "commit": "d1886087fa32588278d5ef2e375166dd8bb8ff74",
       "required_output": ".openclaw-blog/tasks/BLOG-20260225-133205/edit.md"
+    },
+    {
+      "at": "2026-02-26T12:28:50.8307134+09:00",
+      "from": "EDITED",
+      "to": "PUBLISH_READY",
+      "reason": "Prepared publish metadata, SEO checklist, and distribution copy",
+      "branch": "feature/draft-BLOG-20260225-133205",
+      "commit": "1b91f87633501dfe8c24614b8462608cab520789",
+      "required_output": ".openclaw-blog/tasks/BLOG-20260225-133205/publish_ready.md"
     }
   ],
   "idempotency": {
@@ -47,7 +56,8 @@
       "blog-main-20260225-continue-plan-1",
       "1476097518650785864",
       "1476099000010000001",
-      "1476112001000000002"
+      "1476112001000000002",
+      "1476125001000000001"
     ]
   }
 }
