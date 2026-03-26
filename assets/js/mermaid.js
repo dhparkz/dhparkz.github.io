@@ -1,4 +1,23 @@
 (() => {
+  const MERMAID_STARTERS = [
+    'graph',
+    'flowchart',
+    'sequenceDiagram',
+    'stateDiagram',
+    'classDiagram',
+    'erDiagram',
+    'journey',
+    'gantt',
+    'pie',
+    'requirementDiagram',
+    'gitGraph',
+    'mindmap',
+    'timeline',
+    'sankey-beta',
+    'quadrantChart',
+    'xychart-beta',
+  ];
+
   const resolveTheme = () => {
     const mode = document.documentElement.getAttribute('data-mode');
     if (mode === 'dark') return 'dark';
@@ -7,33 +26,39 @@
     return prefersDark ? 'dark' : 'default';
   };
 
-  const hydrateMermaidBlocks = () => {
-    const codeBlocks = document.querySelectorAll('div.language-mermaid, pre > code.language-mermaid');
+  const isMermaidSource = (text) => {
+    const firstLine = (text || '').trim().split('\n').find((line) => line.trim().length > 0)?.trim() || '';
+    return MERMAID_STARTERS.some((starter) =>
+      firstLine === starter ||
+      firstLine.startsWith(`${starter} `) ||
+      firstLine.startsWith(`${starter}-`) ||
+      firstLine.startsWith(`${starter}\t`) ||
+      firstLine.startsWith(`${starter}\r`) ||
+      firstLine.startsWith(`${starter}:{`)
+    );
+  };
 
-    codeBlocks.forEach((block) => {
+  const extractCodeText = (block) => {
+    const candidate = block.querySelector('td.rouge-code pre, pre code, code');
+    return (candidate?.textContent || block.textContent || '').trim();
+  };
+
+  const hydrateMermaidBlocks = () => {
+    const blocks = document.querySelectorAll('div.language-plaintext.highlighter-rouge, div.language-mermaid.highlighter-rouge, pre > code.language-mermaid');
+
+    blocks.forEach((block) => {
       if (block.dataset.mermaidHydrated === 'true') return;
 
-      const code = block.matches('code')
-        ? block
-        : block.querySelector('code.language-mermaid') || block.querySelector('code');
+      const codeText = extractCodeText(block);
+      if (!isMermaidSource(codeText)) return;
+
       const diagram = document.createElement('div');
       diagram.className = 'mermaid';
-      diagram.textContent = (code?.textContent || block.textContent || '').trim();
+      diagram.textContent = codeText;
       diagram.dataset.mermaidHydrated = 'true';
 
-      const wrapper = block.matches('div.language-mermaid') ? block : block.closest('div.language-mermaid');
-      if (wrapper) {
-        wrapper.replaceWith(diagram);
-        return;
-      }
-
-      const pre = block.closest('pre');
-      if (pre) {
-        pre.replaceWith(diagram);
-        return;
-      }
-
-      block.replaceWith(diagram);
+      const outer = block.closest('div.highlighter-rouge') || block.closest('div.language-plaintext') || block.closest('div.language-mermaid') || block;
+      outer.replaceWith(diagram);
     });
   };
 
