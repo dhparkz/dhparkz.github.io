@@ -52,12 +52,12 @@
       const codeText = extractCodeText(block);
       if (!isMermaidSource(codeText)) return;
 
-      const diagram = document.createElement('div');
+      const diagram = document.createElement('pre');
       diagram.className = 'mermaid';
       diagram.textContent = codeText;
       diagram.dataset.mermaidHydrated = 'true';
 
-      const outer = block.closest('div.highlighter-rouge') || block.closest('div.language-plaintext') || block.closest('div.language-mermaid') || block;
+      const outer = block.closest('div.highlighter-rouge') || block.closest('div.language-plaintext') || block.closest('div.language-mermaid') || block.closest('pre') || block;
       outer.replaceWith(diagram);
     });
   };
@@ -70,7 +70,7 @@
       theme: resolveTheme(),
       securityLevel: 'loose',
     });
-    window.mermaid.run({ querySelector: '.mermaid' });
+    window.mermaid.run({ querySelector: 'pre.mermaid, div.mermaid' });
   };
 
   if (document.readyState === 'loading') {
