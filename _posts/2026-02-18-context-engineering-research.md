@@ -5,6 +5,9 @@ date: 2026-02-18 09:00:00 +0900
 categories: [AI, Engineering]
 tags: [context-engineering, prompt-engineering, llm, agents]
 description: "프롬프트 엔지니어링을 넘어 컨텍스트 엔지니어링을 실패 모드, 파이프라인, 4버킷(Write/Select/Compress/Isolate)으로 정리하고 PR 리뷰 에이전트 예시로 적용합니다."
+image:
+  path: /assets/context-engineering-diagram.png
+  alt: Context Engineering Guide diagram
 ---
 
 > 작성 목적: 최근 “Context Engineering”이라는 주제로 탐색하며 얻은 몇 가지 레퍼런스를 토대로 정리해 보았습니다.

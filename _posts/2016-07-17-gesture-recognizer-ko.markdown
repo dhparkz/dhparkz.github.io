@@ -4,6 +4,9 @@ title:  "제스쳐 리코나이저 해석"
 date:   2016-07-17 23:20:13
 categories: iOS
 tags: iOS-Docs
+image:
+  path: https://developer.apple.com/library/ios/documentation/EventHandling/Conceptual/EventHandlingiPhoneOS/Art/event_touch_time_2x.png
+  alt: Gesture recognizer touch time diagram
 ---
 이 글은 [Event Handling Guide for iOS ](https://developer.apple.com/library/ios/documentation/EventHandling/Conceptual/EventHandlingiPhoneOS/Introduction/Introduction.html#//apple_ref/doc/uid/TP40009541-CH1-SW1)와 [Event Handling Guide for iOS](https://developer.apple.com/library/ios/documentation/EventHandling/Conceptual/EventHandlingiPhoneOS/GestureRecognizer_basics/GestureRecognizer_basics.html#//apple_ref/doc/uid/TP40009541-CH2-SW2)를 한국어로 일부분 번역한 글입니다.
 

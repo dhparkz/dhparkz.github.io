@@ -138,7 +138,7 @@ assets:
     env: # [development | production]
 
 pwa:
-  enabled: true # The option for PWA feature (installable)
+  enabled: false # Disable PWA to avoid stale update prompts and caching issues
   cache:
     enabled: false # Disable offline cache to avoid stale updates
     # Paths defined here will be excluded from the PWA cache.

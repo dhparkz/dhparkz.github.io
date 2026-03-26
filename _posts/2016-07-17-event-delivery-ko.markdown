@@ -3,6 +3,9 @@ layout: post
 title:  "이벤트 딜리버리 해석"
 date:   2016-07-17 23:20:13
 categories: iOS
+image:
+  path: https://developer.apple.com/library/ios/documentation/EventHandling/Conceptual/EventHandlingiPhoneOS/Art/hit_testing_2x.png
+  alt: Hit testing diagram
 ---
 이 글은 [Event Delivery: The Responder Chain - iOS Developer Library ](https://developer.apple.com/library/ios/documentation/EventHandling/Conceptual/EventHandlingiPhoneOS/event_delivery_responder_chain/event_delivery_responder_chain.html) 를 한국어로 일부분 번역한 글입니다.
 개인이 번역한 글이므로 오타, 오역이 존재할 수 있습니다.

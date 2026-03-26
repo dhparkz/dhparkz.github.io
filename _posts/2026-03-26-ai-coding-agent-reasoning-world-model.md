@@ -5,6 +5,9 @@ date: 2026-03-26 04:23:00 +0900
 categories: [ai]
 tags: [ai, coding-agent, reasoning, llm, react, world-model, context-engineering]
 description: "Claude Code, Cursor, Codex 같은 AI 코딩 에이전트가 어떻게 추론하고 행동하는지, CoT/ReAct부터 월드 모델까지 공부하며 정리한 기록."
+image:
+  path: /assets/llm-reasoning-thumbnail.png
+  alt: LLM reasoning thumbnail
 ---
 
 > 작성 목적: Claude Code, Cursor, Codex 같은 AI 코딩 에이전트가 어떻게 작동하는지, LLM 추론부터 월드 모델까지 공부하며 정리한 기록입니다.
