@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "Stanford CS230 강의를 NotebookLM으로 한국어 정리해봤다"
+title: "CS230 강의를 NotebookLM으로 정리했다"
 date: 2026-03-27 09:00:00 +0900
 categories: [ai, learning]
 tags: [cs230, notebooklm, deep-learning, stanford, study-notes, korean]
-description: "Stanford CS230 강의를 NotebookLM으로 한국어 정리하고, lecture별 링크를 표로 묶어 필요한 사람에게 공유하기 좋게 남긴 기록."
+description: "CS230 강의를 NotebookLM으로 정리하고, lecture별 링크를 표로 묶어 필요한 사람에게 공유하기 좋게 남긴 기록."
 ---
 
-> 작성 목적: Stanford CS230 강의를 NotebookLM으로 한국어 정리하고, 필요한 사람에게 공유하기 위해 남긴 기록입니다.
+> 작성 목적: CS230 강의를 NotebookLM으로 정리하고, 필요한 사람에게 공유하기 위해 남긴 기록입니다.
 >
 > Co-authored with OpenClaw
 
@@ -32,6 +32,7 @@ CS230은 단순히 모델 구조를 훑는 강의가 아니라, 딥러닝을 어
 | L4 | [Adversarial Robustness and Generative Models](https://notebooklm.google.com/notebook/9687d626-3fdc-4214-804a-fdfd51c3564a) | robust / generative |
 | L5 | [Deep Reinforcement Learning](https://notebooklm.google.com/notebook/aaa24529-3167-4fa2-ba59-8f31ecfde583) | 강화학습 |
 | L6 | [AI Project Strategy](https://notebooklm.google.com/notebook/02da1f5d-4aab-43f9-9fee-5e1107566b63) | 프로젝트 전략 |
+| L7 | [Interpretability of Neural Networks](https://notebooklm.google.com/notebook/7dfb9003-ded2-4c3f-9cb7-ef9198b6af02) | 해석 가능성 |
 | L8 | [Agents, Prompts, and RAG](https://notebooklm.google.com/notebook/9d4fa250-39e0-4865-ace0-04a7d721886a) | agent 활용 |
 | L9 | [Career Advice in AI](https://notebooklm.google.com/notebook/f2c4594a-1fef-4825-b1d9-6ea196b835cb) | 커리어 |
 | L10 | [What’s Going On Inside My Model?](https://notebooklm.google.com/notebook/84a95019-83e5-4c1c-934c-1ff46a6b87ae) | 모델 내부 이해 |
