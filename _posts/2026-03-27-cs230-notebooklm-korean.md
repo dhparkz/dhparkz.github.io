@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "CS230 강의를 NotebookLM으로 정리했다"
-date: 2026-03-27 09:00:00 +0900
+date: 2026-03-27 01:09:00 +0900
 categories: [ai, learning]
 tags: [cs230, notebooklm, deep-learning, stanford, study-notes, korean]
 description: "CS230 강의를 NotebookLM으로 정리하고, lecture별 링크를 표로 묶어 필요한 사람에게 공유하기 좋게 남긴 기록."
