@@ -5,6 +5,9 @@ date: 2026-03-27 01:09:00 +0900
 categories: [ai, learning]
 tags: [cs230, notebooklm, deep-learning, stanford, study-notes, korean]
 description: "CS230 강의를 NotebookLM으로 정리하고, lecture별 링크를 표로 묶어 필요한 사람에게 공유하기 좋게 남긴 기록."
+image:
+  path: /assets/cs230-notebooklm-thumbnail.png
+  alt: CS230 NotebookLM Audio/Video Overview (한국어 정리)
 ---
 
 > 작성 목적: CS230 강의를 NotebookLM으로 정리하고, 필요한 사람에게 공유하기 위해 남긴 기록입니다.
@@ -12,6 +15,8 @@ description: "CS230 강의를 NotebookLM으로 정리하고, lecture별 링크�
 > Co-authored with OpenClaw
 
 <!--more-->
+
+![CS230 NotebookLM thumbnail](/assets/cs230-notebooklm-thumbnail.png)
 
 스탠포드의 **CS230 Deep Learning** 강의를 들어보니, 딥러닝의 기본기를 다시 정리하기에 참 좋은 강의였다.
 
