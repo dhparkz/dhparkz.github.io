@@ -150,12 +150,15 @@ _"실무에서의 코딩은 단순한 알고리즘 구현이 아니라, 얽히�
 AI에게 멘탈 모델을 주입했다면, 이제 AI가 코드를 실행하고 검증할 통제된 환경이 필요하다. 터미널 명령어를 실행하는 주체는 AI 모델 그 자체가 아니다. **ReAct 루프는 모델 내부가 아니라, AI를 감싸고 중계하는 '하네스(Harness, 랩핑 소프트웨어)' 위에서 구동된다.**
 
 ```mermaid
-graph LR
-    User[개발자] -->|PRD / 컨텍스트| Harness[하네스 / 오케스트레이터<br/>(예: LangChain, Cursor 백엔드)]
+flowchart LR
+    User["개발자"] -->|PRD / 컨텍스트| Harness["하네스 / 오케스트레이터
+(예: LangChain, Cursor 백엔드)"]
     
-    subgraph "AI Agent System"
-        Harness <-->|1. 시스템 프롬프트 전송<br/>4. Observation 주입| LLM[대형 언어 모델<br/>(뇌)]
-        Harness <-->|2. Action(명령어) 파싱 및 실행<br/>3. 터미널 결과 캡처| Sandbox[터미널 / Docker 샌드박스<br/>(손발)]
+    subgraph AI_Agent_System["AI Agent System"]
+        Harness <-->|시스템 프롬프트 전송 / Observation 주입| LLM["대형 언어 모델
+(뇌)"]
+        Harness <-->|명령어 파싱 / 터미널 결과 캡처| Sandbox["터미널 / Docker 샌드박스
+(손발)"]
     end
 ```
 
@@ -170,16 +173,18 @@ graph LR
 
 ```mermaid
 flowchart TD
-    subgraph "현재의 LLM 추론"
-        L1[텍스트 입력] --> L2[통계적 패턴 매칭<br/>'이전에 본 비슷한 코드는?'] --> L3[텍스트(코드) 출력]
+    subgraph Current_LLM["현재의 LLM 추론"]
+        L1["텍스트 입력"] --> L2["통계적 패턴 매칭
+이전에 본 비슷한 코드는?"] --> L3["텍스트(코드) 출력"]
     end
 
-    subgraph "월드 모델 (World Model) 기반 추론"
-        W1[현재 프로젝트 상태 관찰] --> W2{잠재 공간 내부 시뮬레이터<br/>'내가 이렇게 코드를 짜면 시스템이 어떻게 변할까?'}
-        W2 -->|가상 렌더링| W3[상태 A 예측: 메모리 누수 발생]
-        W2 -->|가상 실행| W4[상태 B 예측: 정상 작동]
+    subgraph World_Model["월드 모델 (World Model) 기반 추론"]
+        W1["현재 프로젝트 상태 관찰"] --> W2{"잠재 공간 내부 시뮬레이터
+내가 이렇게 코드를 짜면 시스템이 어떻게 변할까?"}
+        W2 -->|가상 렌더링| W3["상태 A 예측: 메모리 누수 발생"]
+        W2 -->|가상 실행| W4["상태 B 예측: 정상 작동"]
         W3 -.-> W2
-        W4 --> W5[가장 안전하고 완벽한 최종 행동(코드) 출력]
+        W4 --> W5["가장 안전하고 완벽한 최종 행동(코드) 출력"]
     end
 ```
 
