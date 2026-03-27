@@ -18,6 +18,22 @@ image:
 
 ![CS230 NotebookLM thumbnail](/assets/cs230-notebooklm-thumbnail.png)
 
+## 원본 강의 재생목록
+
+아래는 내가 정리한 NotebookLM 자료의 원본이 되는 CS230 유튜브 재생목록이다. 글과 함께 같이 보면 맥락을 잡기 쉽다.
+
+<div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin: 1.5rem 0;">
+  <iframe
+    src="https://www.youtube.com/embed/videoseries?list=PLoROMvodv4rNRRGdS0rBbXOUGA0wjdh1X"
+    title="CS230 YouTube Playlist"
+    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+    allowfullscreen
+    loading="lazy">
+  </iframe>
+</div>
+
+- 직접 보기: <https://youtube.com/playlist?list=PLoROMvodv4rNRRGdS0rBbXOUGA0wjdh1X&si=_yExERWBObRWKZ2W>
+
 스탠포드의 **CS230 Deep Learning** 강의를 들어보니, 딥러닝의 기본기를 다시 정리하기에 참 좋은 강의였다.
 
 그래서 반복해서 보기 좋게 만들고 싶었고, NotebookLM으로 **audio / video overview를 한국어로 정리**해 두었다. 이 글은 그 정리본을 필요한 사람에게 공유하기 위해 남긴 기록이다.
