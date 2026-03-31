@@ -5,6 +5,7 @@ date: 2026-04-01 02:00:00 +0900
 categories: [workflow, ai]
 tags: [figma, mcp, ai-agent, design-system, workflow, frontend]
 description: "NotebookLM으로 깊게 읽은 `figma/mcp-server-guide` 저장소를 바탕으로, Figma를 AI 코딩 에이전트의 입력·출력·검증 허브로 쓰는 법을 실무 관점에서 정리했다."
+permalink: /posts/2026-04-01-figma-mcp-server-guide/
 image:
   path: /assets/figma-mcp-server-guide-thumbnail.png
   alt: Figma MCP Server Guide thumbnail
