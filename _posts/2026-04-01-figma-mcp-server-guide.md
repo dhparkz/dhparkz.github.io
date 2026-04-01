@@ -29,6 +29,18 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
 
 ![Figma MCP Server Guide thumbnail](/assets/figma-mcp-server-guide-thumbnail.png)
 
+## 도구 한눈에 보기
+
+아래 표는 repo에서 반복적으로 등장하는 핵심 MCP tools를 실무 순서대로 압축한 것이다. `use_figma` 같은 skill 래퍼는 뒤의 skills 표에서 따로 다룬다.
+
+| Tool | 하는 일 | 잘 맞는 시점 | 주의점 |
+| --- | --- | --- | --- |
+| `get_design_context` | 선택한 frame / layer / component의 구조화된 디자인 컨텍스트를 읽는다. | 화면 구조, spacing, layout을 먼저 파악할 때 | 큰 선택 영역은 잘게 쪼개는 편이 낫다. |
+| `get_metadata` | node ID, hierarchy, 속성 같은 메타데이터를 가져온다. | 구현 전 구조 확인, node 매핑, 비교 기준 확보 | 시각 정보만으로는 부족하니 screenshot과 같이 보는 편이 좋다. |
+| `get_screenshot` | Figma 화면의 시각적 스냅샷을 얻는다. | 구현 결과를 눈으로 검증할 때 | 텍스트/토큰보다 픽셀 기준에 가깝다. |
+| `get_variable_defs` | variables / tokens / theme 관련 정의를 읽는다. | 색상, spacing, typography 체계를 맞출 때 | 변수 컬렉션의 범위를 먼저 확인하는 편이 좋다. |
+| `search_design_system` | 기존 디자인 시스템에서 재사용할 컴포넌트/스타일/변수를 찾는다. | 새 화면을 만들기 전, 기존 자산을 먼저 찾을 때 | 새로 만들기 전에 먼저 검색하는 습관이 중요하다. |
+
 ## 이 repo의 본질: “붙이는 법”보다 “운영하는 법”에 가깝다
 
 이 guide의 핵심은 Figma를 AI에게 보여주는 데만 있지 않다. Figma를 **팀의 작업 시스템**으로 다루게 만드는 데 더 가깝다.
@@ -116,12 +128,29 @@ Figma MCP의 흐름은 복잡해 보이지만, 실제로는 비교적 단순한 
 ![Read → Build → Validate workflow](/assets/figma-mcp-server-guide-read-build-validate.png)
 > 디자인 컨텍스트를 읽고, 코드로 옮기고, 다시 디자인과 메타데이터로 확인하는 흐름을 한 장으로 정리한 그림이다.
 
-## skills별 역할: 무엇을 하고, 언제 쓰는가
+## skills 한눈에 보기
 
-아래 스킬들은 서로 비슷해 보이지만, 맡고 있는 층위가 조금씩 다르다. 그래서 “무엇을 하는지”와 “언제 쓰는지”를 같이 보면 이해가 쉬워진다.
+아래 표는 repo에 있는 primary skill을 먼저 압축해서 정리한 것이다. `figma-power`는 운영/오케스트레이션용 helper로 따로 묶어두었다.
+
+| Skill | 레이어 | 하는 일 | 언제 쓰나 |
+| --- | --- | --- | --- |
+| `figma-use` | 기반 | Figma Plugin API를 안전하게 쓰는 규칙을 강제한다. | Figma를 읽거나 수정하기 전, 가장 먼저 |
+| `figma-implement-design` | 사용 | Figma 디자인을 프로덕션 코드로 번역한다. | 확정된 디자인을 코드로 옮길 때 |
+| `figma-code-connect` | 사용 | Figma 컴포넌트와 코드 컴포넌트를 연결한다. | Code Connect 매핑이 필요할 때 |
+| `figma-generate-design` | 사용 | 코드나 설명을 바탕으로 Figma 화면/페이지를 생성한다. | 코드 → Figma 역방향 생성이 필요할 때 |
+| `figma-generate-library` | 운영 | Figma 디자인 시스템 라이브러리를 구축/업데이트한다. | 토큰, 컴포넌트, 라이브러리를 맞출 때 |
+| `figma-create-design-system-rules` | 운영 | 팀/프로젝트 전용 디자인 시스템 규칙을 문서화한다. | AI와 사람이 같은 규칙으로 움직이게 할 때 |
+| `figma-create-new-file` | 운영 | 새 Design / FigJam 파일을 만든다. | 새 작업 공간이 필요할 때 |
+| `figma-power` | 운영/오케스트레이션 | 큰 작업을 조율하고 반복 가능한 흐름을 만든다. | 여러 단계를 묶어야 할 때 |
+
+아래 상세 설명에서는 이 표를 한 번 더 풀어서 본다.
 
 ![Figma MCP skills map](/assets/figma-mcp-server-guide-skills-map.png)
 > 사용 레이어와 운영 레이어를 나눠 보면, 각 skill이 어느 단계에 있는지 조금 더 쉽게 보인다.
+
+## skills별 역할: 무엇을 하고, 언제 쓰는가
+
+아래 스킬들은 서로 비슷해 보이지만, 맡고 있는 층위가 조금씩 다르다. 그래서 “무엇을 하는지”와 “언제 쓰는지”를 같이 보면 이해가 쉬워진다.
 
 ### `figma-use`
 
