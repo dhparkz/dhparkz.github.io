@@ -54,6 +54,8 @@ Figma Community에 공개된 Skills를 보면, 처음에는 기능 목록처럼 
 - [NotebookLM 공개 노트북](https://notebooklm.google.com/notebook/ef6b1e42-cb68-4cb5-a1a1-13f8c026d20c)
 - [Video overview](/assets/figma-community-skills-public-corpus-video-v2.mp4)
 
+여기에는 원본 인포그래픽과 v2 인포그래픽을 함께 넣었다. v2는 최신판이라, 본문 흐름은 v2를 기준으로 보면 된다.
+
 ![Figma Community Skills public corpus infographic](/assets/figma-community-skills-public-corpus-infographic.png)
 
 ## 커뮤니티 공개 Skill을 읽는 5개 축
