@@ -23,7 +23,15 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
 
 - GitHub repository: <https://github.com/figma/mcp-server-guide>
 - NotebookLM shared notebook: <https://notebooklm.google.com/notebook/782ac466-c068-49ff-bdf4-ba797b28be72>
-- NotebookLM video overview: 같은 노트 안에서 생성된 동영상 overview도 함께 참고할 수 있다.
+
+### 🎥 NotebookLM video overview
+
+<video controls playsinline preload="metadata" style="width: 100%; border-radius: 12px; margin: 0.75rem 0;">
+  <source src="/assets/figma-mcp-server-guide-video-overview.mp4" type="video/mp4">
+  브라우저가 video 태그를 지원하지 않습니다. 대신 <a href="/assets/figma-mcp-server-guide-video-overview.mp4">여기</a>에서 확인할 수 있습니다.
+</video>
+
+> NotebookLM에서 생성한 동영상 overview를 참고용으로 첨부했다.
 
 <!--more-->
 
