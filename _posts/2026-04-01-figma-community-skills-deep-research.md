@@ -46,6 +46,13 @@ Figma Community에 공개된 Skills를 보면, 처음에는 기능 목록처럼 
 
 이 둘은 커뮤니티 Skill과 같은 레벨의 “예시”가 아니다. 먼저 봐야 할 참조점이다.
 
+## 보조 자료
+
+- [NotebookLM 공개 노트북](https://notebooklm.google.com/notebook/ef6b1e42-cb68-4cb5-a1a1-13f8c026d20c)
+- [Video overview](/assets/figma-community-skills-public-corpus-video-v2.mp4)
+
+![Figma Community Skills public corpus infographic](/assets/figma-community-skills-public-corpus-infographic.png)
+
 ## 커뮤니티 공개 Skill을 읽는 5개 축
 
 여기서부터는 공개 Skill을 기능이 아니라 **읽는 방식**으로 나눠보겠다. 4개의 공개 Skill을 5개의 축으로 재배열하는 편이 더 실무적이다. 다섯 번째 축은 별도 repo가 아니라, 이들을 읽는 **태도**다.
@@ -113,6 +120,8 @@ Figma Community에 공개된 Skills를 보면, 처음에는 기능 목록처럼 
 아니다. 그런 약속은 거의 없다. 오히려 제대로 된 Skill일수록 범위가 분명하다. 무엇을 맡고, 무엇을 맡지 않는지 분명하다.
 
 이 축을 잊지 않으면 Skill을 도구로 쓰게 되고, 잊으면 마법으로 오해하게 된다.
+
+![Figma Community Skills public corpus infographic v2](/assets/figma-community-skills-public-corpus-infographic-v2.png)
 
 ## Skill별 상세 설명과 비교
 
