@@ -51,7 +51,8 @@ Figma Community에 공개된 Skills를 처음 보면 기능 목록처럼 보일 
 
 ## 보조 자료
 
-- [NotebookLM 공개 노트북](https://notebooklm.google.com/notebook/ef6b1e42-cb68-4cb5-a1a1-13f8c026d20c)
+NotebookLM 공개 노트북: [열기](https://notebooklm.google.com/notebook/ef6b1e42-cb68-4cb5-a1a1-13f8c026d20c)
+
 ### Video overview
 
 <video controls playsinline preload="metadata" style="width: 100%; border-radius: 12px;" poster="/assets/figma-community-skills-public-corpus-infographic-v2.png">
