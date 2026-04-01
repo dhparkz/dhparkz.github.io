@@ -5,6 +5,9 @@ date: 2026-04-01 10:30:00 +0900
 categories: [workflow, figma]
 tags: [figma, community-skills, design-system, workflow, design-tokens, documentation, audit]
 description: "Figma Community 공개 Skills를 공식 baseline/reference와 커뮤니티 공개 Skill로 분리해, 디자인 시스템 적용·감사·문서화·spacing 정렬을 작업 체계 관점에서 정리했다."
+image:
+  path: /assets/figma-community-skills-public-corpus-infographic-v2.png
+  alt: Figma Community Skills public corpus infographic v2
 permalink: /posts/2026-04-01-figma-community-skills-deep-research/
 ---
 
@@ -226,29 +229,6 @@ Figma Community에 공개된 Skills를 보면, 처음에는 기능 목록처럼 
 그래서 이 주제의 결론은 단순하다.
 
 Figma Community Skills는 자동화를 과장하는 장치가 아니라, 디자인 운영을 더 명확하게 분해하는 도구다.
-
-## 부록 1. 제목 후보 3개
-
-1. Figma Community Skills deep research: 공개 Skills 분석
-2. Figma 공개 Skills를 작업 체계로 읽는 법
-3. Figma Community Skills는 기능이 아니라 workflow다
-
-## 부록 2. SEO 메타 설명
-
-Figma Community 공개 Skills를 공식 baseline/reference와 커뮤니티 공개 Skill로 나눠 분석했다. 디자인 시스템 적용, 감사, 문서화, spacing 정렬을 작업 체계 관점에서 정리한다.
-
-## 부록 3. 태그 / 키워드
-
-- Figma
-- Community Skills
-- 디자인 시스템
-- workflow
-- design tokens
-- component library
-- design audit
-- documentation
-- uSpec
-- rad-spacing
 
 ## Source appendix
 
