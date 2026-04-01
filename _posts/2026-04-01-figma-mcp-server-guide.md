@@ -15,14 +15,15 @@ image:
 >
 > Co-authored with OpenClaw
 
-Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하는 방법” 정도로 읽히기 쉽다. 다만 NotebookLM으로 이 저장소를 조금 더 깊게 따라가 보면, 단순한 연결 문서라기보다 **Figma를 AI 코딩 에이전트의 입력 / 출력 / 검증 허브로 다루는 운영 매뉴얼**에 가깝게 보인다.
+Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하는 방법” 정도로 읽히기 쉽다. 하지만 NotebookLM으로 조금 더 깊게 읽어보면, 이 저장소는 단순한 연결 문서라기보다 **Figma를 AI 코딩 에이전트의 입력 / 출력 / 검증 허브로 다루는 운영 매뉴얼**에 더 가깝게 느껴진다.
 
-이 차이가 중요한 이유는, 실무에서 어려운 지점이 연결 그 자체보다 그 다음 단계에 있기 때문일 것이다. 무엇을 읽고, 무엇을 만들고, 어떤 기준으로 검증할지까지 이어져야 비로소 workflow가 된다. 연결만 해놓고 끝나면 도구 하나를 더한 정도에 머물 수 있고, workflow까지 잡히면 팀의 작업 방식이 조금씩 바뀔 수 있다.
+이 차이가 중요한 이유는, 실제로 막히는 지점이 연결 자체보다 그 다음 단계에 있는 경우가 많기 때문이다. 무엇을 읽고, 무엇을 만들고, 어떤 기준으로 검증할지까지 이어져야 비로소 workflow가 된다. 연결만 해놓고 끝나면 도구 하나를 더한 정도에 머물 수 있지만, workflow까지 잡히면 팀의 작업 방식이 조금씩 바뀔 수 있다.
 
 ## 참고 링크
 
 - GitHub repository: <https://github.com/figma/mcp-server-guide>
 - NotebookLM shared notebook: <https://notebooklm.google.com/notebook/782ac466-c068-49ff-bdf4-ba797b28be72>
+- NotebookLM video overview: 같은 노트 안에서 생성된 동영상 overview도 함께 참고할 수 있다.
 
 <!--more-->
 
@@ -300,4 +301,4 @@ Figma 컴포넌트와 실제 코드 컴포넌트를 연결하는 스킬이다.
 
 이 흐름이 잘 잡히면 Figma는 보조 자료를 넘어, 실무의 운영 레이어에 가까워질 수 있다.
 
-그래서 이 guide는 단순한 참고 문서 이상의 의미를 갖는다고 볼 수 있다. 적어도 지금의 결론은 이렇다. **Figma MCP를 붙이는 법도 중요하지만, Figma MCP로 작업하는 법을 이해하는 편이 더 실무적일 수 있다.**
+그래서 이 guide는 단순한 참고 문서 이상의 의미를 갖는다고 볼 수 있다. 내가 읽어본 결론은 이렇다. **Figma MCP를 붙이는 법도 중요하지만, Figma MCP로 작업하는 법을 이해하는 편이 실제 작업에는 더 도움이 될 수 있다.**
