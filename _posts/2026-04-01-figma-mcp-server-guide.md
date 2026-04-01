@@ -94,6 +94,9 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
 ![3-layer architecture for Figma MCP Server Guide](/assets/figma-mcp-server-guide-architecture.png)
 > Figma MCP Server Guide를 3층 구조로 보면 연결, 사용, 운영의 책임이 조금 더 분명해진다.
 
+![Figma MCP Server Guide infographic](/assets/figma-mcp-server-guide-infographic.png)
+> 글의 핵심을 한 장으로 묶은 인포그래픽이다. 구조, 역할, 구현 연결을 함께 보는 용도로 두면 좋다.
+
 ## 실제 워크플로우는 읽기 → 만들기 → 검증이다
 
 Figma MCP의 흐름은 복잡해 보이지만, 실제로는 비교적 단순한 편이다.
