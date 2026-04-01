@@ -26,12 +26,12 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
 
 ### 🎥 NotebookLM video overview
 
-NotebookLM의 video overview는 긴 리서치 내용을 짧게 훑어볼 수 있게 만든 보조 자료다. 이 글에서는 참고용 영상으로만 붙여두었고, 본문 해석은 여전히 텍스트와 표를 기준으로 보면 된다. 여기서 MCP는 Master Control Program이 아니라 **Model Context Protocol**을 뜻한다.
-
 <video controls playsinline preload="metadata" style="width: 100%; border-radius: 12px; margin: 0.75rem 0;">
   <source src="/assets/figma-mcp-server-guide-video-overview.mp4" type="video/mp4">
   브라우저가 video 태그를 지원하지 않습니다. 대신 <a href="/assets/figma-mcp-server-guide-video-overview.mp4">여기</a>에서 확인할 수 있습니다.
 </video>
+
+> NotebookLM의 video overview는 긴 리서치 내용을 짧게 훑어볼 수 있게 만든 보조 자료다. 이 글에서는 참고용 영상으로만 붙여두었고, 본문 해석은 여전히 텍스트와 표를 기준으로 보면 된다. 여기서 MCP는 Master Control Program이 아니라 **Model Context Protocol**을 뜻한다.
 
 <!--more-->
 
