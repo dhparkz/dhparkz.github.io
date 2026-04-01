@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Figma MCP Server Guide를 실무에 쓰는 법"
+title: "Figma MCP Server Guide: tools와 skills를 repo 기준으로 정리"
 date: 2026-04-01 02:00:00 +0900
 categories: [workflow, ai]
 tags: [figma, mcp, ai-agent, design-system, workflow, frontend]
@@ -31,28 +31,53 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
 
 ## 도구 한눈에 보기
 
-아래 표는 README의 Tools and usage suggestions와 repo 트리를 기준으로 다시 정리한 것이다. 읽기, 생성, 연결, 운영 도구를 나눠 두면 역할이 조금 더 선명해진다.
+아래 표는 README의 Tools and usage suggestions와 repo 트리를 기준으로 다시 정리한 것이다. 읽기, 생성, Code Connect, 운영으로 나눠 보면 역할이 조금 더 선명해진다.
 
-| 분류 | Tool | 하는 일 | 비고 |
-| --- | --- | --- | --- |
-| 읽기 | `get_design_context` | 선택한 Figma node의 구조화된 디자인 컨텍스트를 읽는다. 기본 출력은 React + Tailwind다. | 가장 자주 시작점이 되는 읽기 도구 |
-| 읽기 | `get_metadata` | layer ID, 이름, 위치, 크기 같은 메타데이터를 XML 형태로 돌려준다. | 큰 selection을 먼저 파악할 때 유용 |
-| 읽기 | `get_screenshot` | 선택 영역의 스크린샷을 캡처해 시각적 기준을 준다. | 구현 결과 검증에 자주 사용 |
-| 읽기 | `get_variable_defs` | 선택 영역에서 쓰인 변수와 스타일을 읽는다. | 색상, spacing, typography 확인용 |
-| 읽기 | `get_figjam` | FigJam 다이어그램의 메타데이터와 노드별 스크린샷을 돌려준다. | FigJam 전용 읽기 도구 |
-| 읽기 | `whoami` | 현재 Figma 인증 사용자의 계정 정보를 반환한다. | remote only |
-| 생성/쓰기 | `use_figma` | Figma 파일 안에서 create, edit, delete, inspect를 수행한다. | remote only, `figma-use`와 세트 |
-| 생성/쓰기 | `generate_figma_design` | 웹 페이지나 라이브 UI를 Figma 디자인으로 캡처/변환한다. | specific clients only, remote only |
-| 생성/쓰기 | `generate_diagram` | Mermaid나 자연어 설명으로 FigJam 다이어그램을 만든다. | FigJam 생성용 |
-| 생성/쓰기 | `create_new_file` | 새 Figma Design 또는 FigJam 파일을 만든다. | draft 시작점 만들기 |
-| 탐색/재사용 | `search_design_system` | 연결된 디자인 라이브러리에서 컴포넌트, 변수, 스타일을 찾는다. | 새로 만들기 전에 먼저 검색 |
-| Code Connect | `get_code_connect_map` | Figma node ID와 코드 컴포넌트의 현재 매핑을 조회한다. | 디자인-코드 연결 상태 확인 |
-| Code Connect | `add_code_connect_map` | Figma 요소와 코드 구현체의 새 매핑을 만든다. | 매핑을 직접 추가할 때 |
-| Code Connect | `get_code_connect_suggestions` | 아직 연결되지 않은 컴포넌트의 매핑 후보를 제안한다. | 제안 확인의 시작점 |
-| Code Connect | `send_code_connect_mappings` | 확인된 Code Connect 매핑을 확정한다. | 제안 전송/확정 단계 |
-| 운영 | `create_design_system_rules` | 프로젝트 전용 규칙 파일을 생성한다. | agents / rules 파일 만들기 |
+### 🔍 읽기 도구
 
-이 표를 먼저 보면, 이 repo가 단순히 "Figma를 읽는 도구"가 아니라 읽기, 생성, 재사용, 동기화를 한 세트로 묶고 있다는 점이 좀 더 보인다.
+읽기 도구는 Figma를 바꾸기 전에 먼저 이해하는 데 쓴다. 선택한 node의 구조, 시각 정보, 변수, 메타데이터를 읽어서 다음 단계의 기준을 만든다.
+
+| Tool | 하는 일 | 언제 쓰면 좋은가 |
+| --- | --- | --- |
+| `get_design_context` | 선택한 Figma node의 구조화된 디자인 컨텍스트를 읽는다. 기본 출력은 React + Tailwind지만, 프롬프트로 프레임워크를 바꿀 수 있다. | 화면 구조를 먼저 파악하고, 코드 변환의 출발점을 잡고 싶을 때 |
+| `get_metadata` | layer ID, 이름, type, position, size 같은 기본 속성을 XML 형태로 돌려준다. 큰 selection일수록 이 도구가 먼저 유용하다. | selection이 너무 크거나, node 계층을 먼저 훑어봐야 할 때 |
+| `get_screenshot` | 선택 영역의 스크린샷을 캡처해서 시각적 기준을 준다. | 구현 결과를 눈으로 확인하고, 레이아웃 fidelity를 비교할 때 |
+| `get_variable_defs` | 선택 영역에서 쓰인 변수와 스타일(색상, spacing, typography 등)을 읽는다. | 토큰, 변수, 스타일이 실제로 어떻게 쓰였는지 확인할 때 |
+| `get_figjam` | FigJam 다이어그램의 메타데이터와 노드별 스크린샷을 XML 형태로 돌려준다. | FigJam 보드의 구조와 노드 이미지를 함께 읽고 싶을 때 |
+| `whoami` | 현재 Figma에 인증된 사용자의 이메일, plan, seat 정보를 확인한다. | remote only 환경에서 계정/권한 상태를 확인할 때 |
+
+### ✨ 생성 도구
+
+생성 도구는 읽은 컨텍스트를 실제 결과물로 바꾸는 쪽에 가깝다. 화면을 만들거나, 다이어그램을 생성하거나, 새 파일을 준비하는 흐름이 여기에 들어간다.
+
+| Tool | 하는 일 | 언제 쓰면 좋은가 |
+| --- | --- | --- |
+| `use_figma` | Figma 파일 안에서 create, edit, delete, inspect를 수행하는 범용 실행 엔진이다. | 페이지, 프레임, 컴포넌트, 변수, 스타일을 직접 만들거나 수정할 때 |
+| `generate_figma_design` | 웹 페이지나 라이브 UI를 Figma 디자인으로 캡처/변환한다. | 코드나 실제 화면을 Figma 쪽으로 옮기고 싶을 때 |
+| `generate_diagram` | Mermaid나 자연어 설명으로 FigJam 다이어그램을 생성한다. | 플로우차트, 상태도, 순서도를 빠르게 만들고 싶을 때 |
+| `create_new_file` | 새 Figma Design 또는 FigJam 파일을 만든다. | 빈 draft에서 새 작업을 시작할 때 |
+
+### 🔗 Code Connect 도구
+
+Code Connect 도구는 Figma와 코드 사이의 매핑을 다룬다. 디자인에서 코드 구현체를 찾아주고, 연결하고, 확정하는 흐름으로 보면 이해가 쉽다.
+
+| Tool | 하는 일 | 언제 쓰면 좋은가 |
+| --- | --- | --- |
+| `get_code_connect_map` | Figma node ID와 코드 컴포넌트의 현재 매핑 상태를 조회한다. | 이미 연결된 컴포넌트가 무엇인지 확인하고 싶을 때 |
+| `add_code_connect_map` | 특정 Figma 요소와 코드 구현체 사이의 새 매핑을 만든다. | 새 Code Connect 연결을 추가할 때 |
+| `get_code_connect_suggestions` | 아직 연결되지 않은 Figma 컴포넌트의 매핑 후보를 제안한다. | 어떤 컴포넌트가 코드와 연결되어야 하는지 먼저 찾고 싶을 때 |
+| `send_code_connect_mappings` | 제안받은 Code Connect 매핑을 검토한 뒤 확정한다. | 후보 매핑을 일괄 확정해 연결 상태를 마무리할 때 |
+
+### 🛠️ 운영 도구
+
+운영 도구는 새로 만들기보다, 이미 있는 시스템을 더 잘 재사용하고 유지하는 데 가깝다. 검색, 규칙화, 재사용 기준 정리가 여기에 들어간다.
+
+| Tool | 하는 일 | 언제 쓰면 좋은가 |
+| --- | --- | --- |
+| `search_design_system` | 연결된 디자인 라이브러리에서 컴포넌트, 변수, 스타일을 찾는다. | 새로 그리기 전에 기존 디자인 시스템 자산부터 찾고 싶을 때 |
+| `create_design_system_rules` | 에이전트가 코드를 생성할 때 일관성을 유지하도록 돕는 프로젝트 전용 디자인 시스템 룰 파일을 만든다. | CLAUDE.md, AGENTS.md, .cursor/rules 같은 규칙 파일을 만들 때 |
+
+이렇게 보면 Figma MCP는 단일 도구 묶음이 아니라, **읽기 → 생성 → 연결 → 운영**의 흐름으로 이어진다는 점이 더 잘 보인다.
 
 ## 이 repo의 본질: “붙이는 법”보다 “운영하는 법”에 가깝다
 
