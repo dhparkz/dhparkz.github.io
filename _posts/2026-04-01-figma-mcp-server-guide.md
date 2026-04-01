@@ -31,15 +31,28 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
 
 ## 도구 한눈에 보기
 
-아래 표는 repo에서 반복적으로 등장하는 핵심 MCP tools를 실무 순서대로 압축한 것이다. `use_figma` 같은 skill 래퍼는 뒤의 skills 표에서 따로 다룬다.
+아래 표는 README의 Tools and usage suggestions와 repo 트리를 기준으로 다시 정리한 것이다. 읽기, 생성, 연결, 운영 도구를 나눠 두면 역할이 조금 더 선명해진다.
 
-| Tool | 하는 일 | 잘 맞는 시점 | 주의점 |
+| 분류 | Tool | 하는 일 | 비고 |
 | --- | --- | --- | --- |
-| `get_design_context` | 선택한 frame / layer / component의 구조화된 디자인 컨텍스트를 읽는다. | 화면 구조, spacing, layout을 먼저 파악할 때 | 큰 선택 영역은 잘게 쪼개는 편이 낫다. |
-| `get_metadata` | node ID, hierarchy, 속성 같은 메타데이터를 가져온다. | 구현 전 구조 확인, node 매핑, 비교 기준 확보 | 시각 정보만으로는 부족하니 screenshot과 같이 보는 편이 좋다. |
-| `get_screenshot` | Figma 화면의 시각적 스냅샷을 얻는다. | 구현 결과를 눈으로 검증할 때 | 텍스트/토큰보다 픽셀 기준에 가깝다. |
-| `get_variable_defs` | variables / tokens / theme 관련 정의를 읽는다. | 색상, spacing, typography 체계를 맞출 때 | 변수 컬렉션의 범위를 먼저 확인하는 편이 좋다. |
-| `search_design_system` | 기존 디자인 시스템에서 재사용할 컴포넌트/스타일/변수를 찾는다. | 새 화면을 만들기 전, 기존 자산을 먼저 찾을 때 | 새로 만들기 전에 먼저 검색하는 습관이 중요하다. |
+| 읽기 | `get_design_context` | 선택한 Figma node의 구조화된 디자인 컨텍스트를 읽는다. 기본 출력은 React + Tailwind다. | 가장 자주 시작점이 되는 읽기 도구 |
+| 읽기 | `get_metadata` | layer ID, 이름, 위치, 크기 같은 메타데이터를 XML 형태로 돌려준다. | 큰 selection을 먼저 파악할 때 유용 |
+| 읽기 | `get_screenshot` | 선택 영역의 스크린샷을 캡처해 시각적 기준을 준다. | 구현 결과 검증에 자주 사용 |
+| 읽기 | `get_variable_defs` | 선택 영역에서 쓰인 변수와 스타일을 읽는다. | 색상, spacing, typography 확인용 |
+| 읽기 | `get_figjam` | FigJam 다이어그램의 메타데이터와 노드별 스크린샷을 돌려준다. | FigJam 전용 읽기 도구 |
+| 읽기 | `whoami` | 현재 Figma 인증 사용자의 계정 정보를 반환한다. | remote only |
+| 생성/쓰기 | `use_figma` | Figma 파일 안에서 create, edit, delete, inspect를 수행한다. | remote only, `figma-use`와 세트 |
+| 생성/쓰기 | `generate_figma_design` | 웹 페이지나 라이브 UI를 Figma 디자인으로 캡처/변환한다. | specific clients only, remote only |
+| 생성/쓰기 | `generate_diagram` | Mermaid나 자연어 설명으로 FigJam 다이어그램을 만든다. | FigJam 생성용 |
+| 생성/쓰기 | `create_new_file` | 새 Figma Design 또는 FigJam 파일을 만든다. | draft 시작점 만들기 |
+| 탐색/재사용 | `search_design_system` | 연결된 디자인 라이브러리에서 컴포넌트, 변수, 스타일을 찾는다. | 새로 만들기 전에 먼저 검색 |
+| Code Connect | `get_code_connect_map` | Figma node ID와 코드 컴포넌트의 현재 매핑을 조회한다. | 디자인-코드 연결 상태 확인 |
+| Code Connect | `add_code_connect_map` | Figma 요소와 코드 구현체의 새 매핑을 만든다. | 매핑을 직접 추가할 때 |
+| Code Connect | `get_code_connect_suggestions` | 아직 연결되지 않은 컴포넌트의 매핑 후보를 제안한다. | 제안 확인의 시작점 |
+| Code Connect | `send_code_connect_mappings` | 확인된 Code Connect 매핑을 확정한다. | 제안 전송/확정 단계 |
+| 운영 | `create_design_system_rules` | 프로젝트 전용 규칙 파일을 생성한다. | agents / rules 파일 만들기 |
+
+이 표를 먼저 보면, 이 repo가 단순히 "Figma를 읽는 도구"가 아니라 읽기, 생성, 재사용, 동기화를 한 세트로 묶고 있다는 점이 좀 더 보인다.
 
 ## 이 repo의 본질: “붙이는 법”보다 “운영하는 법”에 가깝다
 
@@ -130,18 +143,25 @@ Figma MCP의 흐름은 복잡해 보이지만, 실제로는 비교적 단순한 
 
 ## skills 한눈에 보기
 
-아래 표는 repo에 있는 primary skill을 먼저 압축해서 정리한 것이다. `figma-power`는 운영/오케스트레이션용 helper로 따로 묶어두었다.
+아래 표는 repo의 `skills/` 디렉토리에 들어 있는 7개 스킬을 먼저 정리한 것이다. `figma-power`는 `skills/` 밖의 별도 운영 디렉토리라 아래에 따로 적었다.
 
-| Skill | 레이어 | 하는 일 | 언제 쓰나 |
+| Skill | 위치 | 하는 일 | 실무 포인트 |
 | --- | --- | --- | --- |
-| `figma-use` | 기반 | Figma Plugin API를 안전하게 쓰는 규칙을 강제한다. | Figma를 읽거나 수정하기 전, 가장 먼저 |
-| `figma-implement-design` | 사용 | Figma 디자인을 프로덕션 코드로 번역한다. | 확정된 디자인을 코드로 옮길 때 |
-| `figma-code-connect` | 사용 | Figma 컴포넌트와 코드 컴포넌트를 연결한다. | Code Connect 매핑이 필요할 때 |
-| `figma-generate-design` | 사용 | 코드나 설명을 바탕으로 Figma 화면/페이지를 생성한다. | 코드 → Figma 역방향 생성이 필요할 때 |
-| `figma-generate-library` | 운영 | Figma 디자인 시스템 라이브러리를 구축/업데이트한다. | 토큰, 컴포넌트, 라이브러리를 맞출 때 |
-| `figma-create-design-system-rules` | 운영 | 팀/프로젝트 전용 디자인 시스템 규칙을 문서화한다. | AI와 사람이 같은 규칙으로 움직이게 할 때 |
-| `figma-create-new-file` | 운영 | 새 Design / FigJam 파일을 만든다. | 새 작업 공간이 필요할 때 |
-| `figma-power` | 운영/오케스트레이션 | 큰 작업을 조율하고 반복 가능한 흐름을 만든다. | 여러 단계를 묶어야 할 때 |
+| `figma-use` | `skills/figma-use` | `use_figma`를 호출하기 전 반드시 로드해야 하는 기반 스킬이다. | 폰트 로드, 색상 범위, return 패턴, 작은 단위 작업 |
+| `figma-implement-design` | `skills/figma-implement-design` | Figma 디자인을 프로덕션 코드로 번역한다. | React + Tailwind 출발점, 프로젝트 컨벤션으로 재정렬 |
+| `figma-code-connect` | `skills/figma-code-connect` | Figma 컴포넌트와 코드 컴포넌트를 매핑하는 `.figma.js` 템플릿을 만든다. | published component, node-id URL, props mapping |
+| `figma-generate-design` | `skills/figma-generate-design` | 코드나 설명을 바탕으로 Figma screen/page를 section 단위로 생성한다. | search_design_system 기반 재사용, 점진적 조립 |
+| `figma-generate-library` | `skills/figma-generate-library` | Figma 디자인 시스템 라이브러리 전체를 구축하거나 업데이트한다. | token, component, theme, validation, cleanup |
+| `figma-create-design-system-rules` | `skills/figma-create-design-system-rules` | 프로젝트 전용 규칙 파일을 만들어 에이전트의 작업 문법을 고정한다. | CLAUDE/AGENTS/.cursor/rules 등에 반영 |
+| `figma-create-new-file` | `skills/figma-create-new-file` | 새 Figma Design 또는 FigJam 파일을 만든다. | 새 draft 시작점 만들기 |
+
+### `figma-power`
+
+이 repo에는 `skills/` 밖에 `figma-power/` 디렉토리가 따로 있다. 엄밀히 말하면 개별 skill 파일이라기보다, 더 큰 작업을 오케스트레이션하는 운영 묶음에 가깝다.
+
+- 큰 작업 흐름을 묶어 다루는 데 적합하다.
+- 생성, 검증, 재사용을 반복하는 workflow를 정리하는 데 도움이 된다.
+- 그래서 나는 이 글에서는 `figma-power`를 "별도 운영 레이어"로 보는 편이 더 맞다고 느꼈다.
 
 아래 상세 설명에서는 이 표를 한 번 더 풀어서 본다.
 
