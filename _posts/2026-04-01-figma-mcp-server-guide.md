@@ -31,7 +31,7 @@ Figma MCP Server Guide를 처음 보면, 그냥 “Figma를 AI 툴에 연결하�
   브라우저가 video 태그를 지원하지 않습니다. 대신 <a href="/assets/figma-mcp-server-guide-video-overview.mp4">여기</a>에서 확인할 수 있습니다.
 </video>
 
-> NotebookLM에서 생성한 동영상 overview를 참고용으로 첨부했다.
+> NotebookLM에서 생성한 동영상 overview를 참고용으로 첨부했다. 여기서 MCP는 Master Control Program이 아니라 **Model Context Protocol**을 뜻한다. NotebookLM의 요약 문구에서 MCP를 잘못 풀어쓸 수 있어서, 이 글에서는 정확한 의미로 이해하면 된다.
 
 <!--more-->
 

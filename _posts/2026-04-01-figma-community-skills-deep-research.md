@@ -60,7 +60,6 @@ NotebookLM 공개 노트북: [열기](https://notebooklm.google.com/notebook/ef6
   이 브라우저는 video 태그를 지원하지 않습니다. <a href="/assets/figma-community-skills-public-corpus-video-v2.mp4">비디오 파일</a>을 열어 보세요.
 </video>
 
-여기에는 원본 인포그래픽과 v2 인포그래픽을 함께 넣었다. v2는 최신판이라, 본문 흐름은 v2를 기준으로 보면 된다.
 
 ![Figma Community Skills public corpus infographic](/assets/figma-community-skills-public-corpus-infographic.png)
 
