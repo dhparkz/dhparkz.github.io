@@ -115,3 +115,12 @@ MLX 기준으로 보면:
 - **16GB M4 Mac mini**: Gemma 4 소형 모델은 가능
 - **TB4 클러스터**: 분산 추론 실험은 가능, 메모리 통합은 아님
 - **실사용 확장**: M4 Pro Mac mini 또는 더 큰 unified memory 기기를 검토해야 함
+
+## 참고 링크
+
+- 유튜브: <https://youtu.be/bSq54AMAH0I?si=B6uuOydRaRR6OJWY>
+- Apple Mac mini 기술 사양: <https://www.apple.com/mac-mini/specs/>
+- Apple Developer TN3205: <https://developer.apple.com/documentation/technotes/tn3205-low-latency-communication-with-rdma-over-thunderbolt?changes=l_5>
+- MLX distributed documentation: <https://ml-explore.github.io/mlx/build/html/usage/distributed.html>
+- Google Gemma 4 발표: <https://developers.googleblog.com/bring-state-of-the-art-agentic-skills-to-the-edge-with-gemma-4/>
+- Unsloth Gemma 4 문서: <https://unsloth.ai/docs/models/gemma-4>
