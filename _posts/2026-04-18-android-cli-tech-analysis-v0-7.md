@@ -58,6 +58,7 @@ permalink: /posts/2026-04-18-android-cli-tech-analysis-v0-7/
 | 🧪 **자연어 기반 E2E 테스트 작성** | [§12 Journey](#12-journey--xml-기반-e2e-테스트) |
 | 🧩 **Antigravity 스킬 관리** | [§13 Skills](#13-skills-android-skills) |
 | ⚠️ **함정·제약 확인** | [§14 한계와 주의사항](#14-한계와-주의사항) |
+
 ## 커맨드 역색인
 
 
@@ -80,6 +81,7 @@ permalink: /posts/2026-04-18-android-cli-tech-analysis-v0-7/
 | `sdk install/update/remove/list` | SDK 패키지 관리 | [§4](#4-sdk-관리-sdk) |
 | `skills add/remove/list/find` | Antigravity 스킬 레지스트리 | [§13](#13-skills-android-skills) |
 | `update` | CLI 자체 업데이트 | [§2](#2-설치와-업데이트) |
+
 > 최신 플래그 목록은 항상 `android <cmd> --help` 로 확인한다. 0.x 시리즈 특성상 시그니처가 조용히 바뀔 수 있다.
 
 <!--more-->
@@ -131,6 +133,7 @@ permalink: /posts/2026-04-18-android-cli-tech-analysis-v0-7/
 | 자동화 스크립트에서 UI 상태를 읽고 판단해야 할 때 | Android Studio 에서 손으로 하는 탐색적 디버깅 |
 | 에뮬레이터·SDK를 코드로 재현 가능하게 관리할 때 | CI 에서 Espresso/Compose UI Test 수준의 정밀 테스트가 필요할 때 |
 | 기획 문서의 자연어 시나리오를 그대로 테스트로 바꾸고 싶을 때 | 네트워크 트래픽 모니터링, 프로파일링 등 low-level 관찰 |
+
 ---
 
 
@@ -147,7 +150,7 @@ $ android --version
 
 0.7.15222914
 
-  
+
 
 # 환경 정보
 
@@ -159,7 +162,7 @@ version: 0.7.15222914
 
 launcher_version: 0.7.15222914
 
-  
+
 
 # CLI 자체 업데이트
 
@@ -249,6 +252,7 @@ docs
 | 관찰 | `layout` | `--diff`, `--pretty`, `--device`, `-o` | `android layout --pretty` |
 | 실행 | `run` | `--apks`, `--activity`, `--debug`, `--device` | `android run --apks app-debug.apk` |
 | 지식 | `docs` | `search`, `fetch` | `android docs search "compose state"` |
+
 ---
 
 
@@ -267,7 +271,7 @@ docs
 
 $ android sdk list --all
 
-  
+
 
 # 일부 실제 출력
 
@@ -377,6 +381,7 @@ CLI 의 가장 특징적인 기능이다. 화면에 보이는 UI 트리를 **JSO
 | `bounds` | 화면 좌표 `[minX,minY][maxX,maxY]` |
 | `center` | 중심 좌표 `[x,y]` — 탭 입력에 바로 씀 |
 | `off-screen` | UI 트리에 있지만 보이지 않는 요소 (스크롤 필요) |
+
 ### 실 출력 예시
 
 
@@ -495,13 +500,13 @@ CLI-->>Agent: JSON 5개 요소 (변경분만)
 
 $ android screen capture -o ./shot.png
 
-  
+
 
 # 번호가 붙은 어노테이트 스크린샷
 
 $ android screen capture --annotate -o ./shot.png
 
-  
+
 
 # 라벨 → 좌표 역변환
 
@@ -536,6 +541,7 @@ adb shell input $(android screen resolve --screen shot.png --string "tap #34")
 | `layout` | 첫 진입 또는 컨텍스트 리셋 후 | 중간 |
 | `screen capture` | 이미지 해석이 필요한 경우 | 높음 (VLM 토큰) |
 | `screen capture --annotate` + `resolve` | WebView·애니메이션 등 `layout` 실패 시 | 높음 |
+
 ---
 
 
@@ -555,6 +561,7 @@ adb shell input $(android screen resolve --screen shot.png --string "tap #34")
 | 좌표 변환 | `android screen resolve` |
 | 입력 이벤트 | `adb shell input` |
 | 로그·쉘 실행 | `adb logcat`, `adb shell` |
+
 ### 탭 한 번의 흐름
 
 
@@ -565,17 +572,17 @@ adb shell input $(android screen resolve --screen shot.png --string "tap #34")
 
 android layout --pretty > ui.json
 
-  
+
 
 # 2. ui.json 에서 center 좌표를 뽑는다 (예: [405, 2196])
 
-  
+
 
 # 3. 탭한다
 
 adb shell input tap 405 2196
 
-  
+
 
 # 4. 달라진 것만 본다
 
@@ -611,19 +618,19 @@ android layout --diff
 
 $ android run --apks ./app-debug.apk
 
-  
+
 
 # split APK (App Bundle 산출물)
 
 $ android run --apks app.apk,app-armeabi-v7a.apk,app-xxxhdpi.apk
 
-  
+
 
 # 특정 액티비티 직접 기동
 
 $ android run --apks app.apk --activity com.example.MainActivity
 
-  
+
 
 # 디버거 붙은 상태로 실행
 
@@ -655,13 +662,13 @@ $ android run --apks app.apk --debug --device R3CX50BSEVF
 
 $ android emulator create --list-profiles
 
-  
+
 
 # 특정 프로필로 AVD 생성
 
 $ android emulator create --profile=phone
 
-  
+
 
 # 기존 AVD 목록
 
@@ -677,7 +684,7 @@ Pixel_6_API_26
 
 Pixel_9_Pro_XL_API_35
 
-  
+
 
 # 기동·정지·삭제
 
@@ -738,6 +745,7 @@ Android Knowledge Base (`kb://` 스킴) 를 직접 조회한다. `android docs f
 | `android docs` | Android 공식 개발자 문서 전용 | 최신성·정확성, 공식 표현 일치 |
 | Context7 MCP | 일반 오픈소스 라이브러리 | 대상 폭이 넓음, 버전별 조회 |
 | WebSearch | 그 외 전부 | 폭넓음, 출처 다양 |
+
 Android API 마이그레이션 가이드·공식 베스트 프랙티스가 필요하면 **`android docs` 를 먼저** 찾는다. 그 다음 구체적 라이브러리(예: Orbit-MVI) 문서가 필요하면 Context7, 블로그·이슈 검색이 필요하면 WebSearch 순으로 내려간다.
 
 
@@ -824,6 +832,7 @@ Pass --> End
 | Maestro | YAML DSL | Maestro runtime | 간결한 DSL, 기기 호환성 | 별도 러너 필요 |
 | UI Automator | Java/Kotlin | 기기 내 | 시스템 UI 접근 | 러닝 커브 |
 | **Journey** | **자연어 XML** | **LLM** | **기획 문서 → 테스트 직결** | **LLM 비결정성, 과금** |
+
 Journey 는 Espresso 를 **대체하지 않는다**. "사람이 말로 설명한 시나리오를 그대로 돌리는" 용도의 보완재로 보는 것이 맞다.
 
 
@@ -876,6 +885,7 @@ agp-9-upgrade
 | 저장 위치 | `~/.claude/skills/<name>` 하위 | `~/.claude/plugins/.../skills/` 또는 로컬 |
 | 업데이트 | `android skills add/remove` | 플러그인·마켓플레이스 별 |
 | 네임스페이스 | CLI 도구 고유 | Claude Code 고유 |
+
 같은 디렉토리를 공유하는 경우도 있지만(`android-cli` 자체가 양쪽에 있다), **같은 이름이어도 역할이 다를 수 있다**는 점만 기억하면 된다.
 
 
