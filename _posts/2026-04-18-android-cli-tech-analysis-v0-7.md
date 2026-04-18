@@ -195,47 +195,26 @@ claude code, codex, gemini-cli, cursor, copilot, antigravity 와 같은 coding a
 
 
 ```mermaid
-
 mindmap
-
-root((android))
-
-환경
-
-init
-
-info
-
-update
-
-sdk
-
-skills
-
-프로젝트
-
-create
-
-describe
-
-디바이스
-
-emulator
-
-screen
-
-런타임 관찰
-
-layout
-
-실행
-
-run
-
-지식
-
-docs
-
+  root((android))
+    환경
+      init
+      info
+      update
+      sdk
+      skills
+    프로젝트
+      create
+      describe
+    디바이스
+      emulator
+      screen
+    런타임 관찰
+      layout
+    실행
+      run
+    지식
+      docs
 ```
 
 
