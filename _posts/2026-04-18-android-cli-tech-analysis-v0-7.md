@@ -188,53 +188,39 @@ claude code, codex, gemini-cli, cursor, copilot, antigravity 와 같은 coding a
 
 ## 3. 커맨드 한눈에 보기
 
-
-
-11개의 최상위 커맨드가 있다. 카테고리별로 정리하면 다음과 같다.
-
-
+11개의 최상위 커맨드는 아래처럼 묶인다. 세부 플래그와 예시는 §15 치트시트에서 다시 보면 된다.
 
 ```mermaid
-mindmap
-  root((android))
-    환경
-      init
-      info
-      update
-      sdk
-      skills
-    프로젝트
-      create
-      describe
-    디바이스
-      emulator
-      screen
-    런타임 관찰
-      layout
-    실행
-      run
-    지식
-      docs
+flowchart TB
+    A([android])
+
+    A --> E[환경]
+    A --> P[프로젝트]
+    A --> D[디바이스]
+    A --> R[관찰]
+    A --> X[실행]
+    A --> K[지식]
+
+    E --> E1[init]
+    E --> E2[info]
+    E --> E3[update]
+    E --> E4[sdk]
+    E --> E5[skills]
+
+    P --> P1[create]
+    P --> P2[describe]
+
+    D --> D1[emulator]
+    D --> D2[screen]
+
+    R --> R1[layout]
+
+    X --> X1[run]
+
+    K --> K1[docs]
 ```
 
-
-
-| 카테고리 | 커맨드 | 주요 플래그 | 예시 한 줄 |
-|---------|-------|------------|-----------|
-| 환경 구성 | `sdk` | `install`, `update`, `remove`, `list` | `android sdk install "platforms;android-34"` |
-| 환경 구성 | `skills` | `add`, `remove`, `list`, `find` | `android skills list` |
-| 환경 구성 | `update`, `init`, `info` | — | `android info sdk` |
-| 프로젝트 | `create` | `--name`, `--minSdk`, `-o`, `--list` | `android create empty-activity --name="My App"` |
-| 프로젝트 | `describe` | `--project_dir` | `android describe --project_dir=./my-app` |
-| 디바이스 | `emulator` | `create`, `start`, `stop`, `list`, `remove` | `android emulator start Pixel_8a` |
-| 디바이스 | `screen` | `capture`, `resolve` | `android screen capture -o ./shot.png` |
-| 관찰 | `layout` | `--diff`, `--pretty`, `--device`, `-o` | `android layout --pretty` |
-| 실행 | `run` | `--apks`, `--activity`, `--debug`, `--device` | `android run --apks app-debug.apk` |
-| 지식 | `docs` | `search`, `fetch` | `android docs search "compose state"` |
-
 ---
-
-
 
 ## 4. SDK 관리 (`sdk`)
 
